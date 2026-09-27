@@ -6,7 +6,7 @@
   <title>Tihvert</title>
   <meta name="description" content="Tihvert. Writes code, breaks code, occasionally fixes it.">
   <meta name="theme-color" content="#09090b">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%2309090b'/><text x='50%' y='56%' text-anchor='middle' dominant-baseline='middle' font-family='monospace' font-weight='700' font-size='36' fill='%23e4e4e7'>T</text></svg>">
+  <link rel="icon" id="favicon" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
@@ -29,7 +29,7 @@
       padding: 24px 16px;
       overflow: hidden;
     }
-    canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    canvas#bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
     /* click-to-enter gate */
     #gate {
@@ -59,16 +59,14 @@
     @keyframes slideup { to { opacity: 1; transform: none; } }
 
     .avatar {
-      width: 88px; height: 88px; margin: 0 auto 16px;
+      width: 96px; height: 96px; margin: 0 auto 16px;
       border-radius: 50%;
-      display: grid; place-items: center;
-      font-size: 36px; font-weight: 800;
-      background: radial-gradient(circle at 30% 25%, #2a2a33, #111114);
-      border: 1px solid var(--line);
-      cursor: pointer; user-select: none;
-      transition: transform .25s ease;
+      border: 2px solid var(--line);
+      box-shadow: 0 0 0 4px rgba(196, 181, 253, .10), 0 8px 30px rgba(0,0,0,.5);
+      cursor: pointer; user-select: none; display: block;
+      transition: transform .25s ease, box-shadow .25s ease;
     }
-    .avatar:hover { transform: rotate(-8deg) scale(1.04); }
+    .avatar:hover { transform: rotate(-8deg) scale(1.04); box-shadow: 0 0 0 4px rgba(196, 181, 253, .25), 0 8px 30px rgba(0,0,0,.5); }
     .avatar.spin { animation: spin .8s ease; }
     @keyframes spin { to { transform: rotate(720deg); } }
 
@@ -91,9 +89,26 @@
 
     .egg { margin-top: 18px; font-size: 11px; color: #52525b; min-height: 1.4em; }
 
+    /* sound toggle */
+    #sound {
+      position: fixed; right: 16px; bottom: 16px; z-index: 4;
+      display: none; align-items: center; gap: 8px;
+      font: 12px "JetBrains Mono", monospace; color: var(--muted);
+      background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+      padding: 8px 12px; cursor: pointer; backdrop-filter: blur(10px);
+    }
+    #sound.show { display: flex; }
+    #sound:hover { color: var(--text); border-color: var(--accent); }
+    .bars { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+    .bars i { width: 2px; background: var(--accent); animation: eq 1s ease-in-out infinite; }
+    .bars i:nth-child(2) { animation-delay: .2s; } .bars i:nth-child(3) { animation-delay: .4s; }
+    @keyframes eq { 0%,100% { height: 3px; } 50% { height: 12px; } }
+    #sound.muted .bars i { animation: none; height: 3px; opacity: .5; }
+
     @media (prefers-reduced-motion: reduce) {
       main.in { animation: none; opacity: 1; transform: none; }
       .avatar.spin { animation: none; }
+      .bars i { animation: none; height: 6px; }
     }
   </style>
 </head>
@@ -102,7 +117,7 @@
   <div id="gate" role="button" tabindex="0" aria-label="Enter"><span class="blink">click to enter</span></div>
 
   <main id="card">
-    <div class="avatar" id="avatar" title="don't click me">T</div>
+    <img class="avatar" id="avatar" src="avatar.png" alt="Tihvert" title="don't click me" width="96" height="96">
     <h1>Tihvert</h1>
     <p class="typed" id="typed"></p>
 
@@ -126,6 +141,8 @@
     <p class="egg" id="egg"></p>
   </main>
 
+  <button id="sound" type="button" aria-label="Toggle music"><span class="bars"><i></i><i></i><i></i></span><span id="soundLabel">music on</span></button>
+
   <script>
     // Set your channel here, e.g. "https://www.youtube.com/@yourhandle". Empty = icon hidden.
     var YOUTUBE_URL = "";
@@ -133,13 +150,16 @@
 
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // gate
+    /* ---------- gate ---------- */
     var gate = document.getElementById('gate'), card = document.getElementById('card');
-    function enter() { gate.classList.add('gone'); card.classList.add('in'); startTyping(); }
+    function enter() {
+      if (gate.classList.contains('gone')) return;
+      gate.classList.add('gone'); card.classList.add('in'); startTyping(); Music.start();
+    }
     gate.addEventListener('click', enter);
     gate.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') enter(); });
 
-    // typewriter
+    /* ---------- typewriter bio ---------- */
     var lines = ['writes code.', 'breaks code.', 'fixes the code that broke.', 'debugging at 3am.', 'probably asleep.', 'touching grass (rarely).'];
     var el = document.getElementById('typed'), li = 0, ci = 0, del = false, started = false;
     function startTyping() { if (started) return; started = true; if (reduce) { el.textContent = lines[0]; return; } tick(); }
@@ -152,12 +172,12 @@
       else { del = false; li = (li + 1) % lines.length; setTimeout(tick, 300); }
     }
 
-    // Helsinki clock
+    /* ---------- Helsinki clock ---------- */
     var clock = document.getElementById('clock');
     function t() { clock.textContent = '🕒 ' + new Date().toLocaleTimeString('en-GB', { timeZone: 'Europe/Helsinki', hour: '2-digit', minute: '2-digit' }); }
     t(); setInterval(t, 10000);
 
-    // avatar easter egg
+    /* ---------- avatar easter egg ---------- */
     var clicks = 0, egg = document.getElementById('egg'), av = document.getElementById('avatar');
     var msgs = ['', 'hey.', 'stop that.', 'seriously.', 'ok fine.', 'wheee'];
     av.addEventListener('click', function () {
@@ -166,11 +186,39 @@
       if (clicks >= 5) { av.classList.remove('spin'); void av.offsetWidth; av.classList.add('spin'); clicks = 0; setTimeout(function () { egg.textContent = ''; }, 1500); }
     });
 
-    // drifting particles
+    /* ---------- animated tab: typing title + pulsing avatar favicon ---------- */
+    (function () {
+      var name = 'Tihvert', i = 0, back = false;
+      function title() {
+        document.title = (name.slice(0, i) || '​') + (i < name.length ? '_' : '');
+        if (!back) { if (i < name.length) i++; else { back = true; setTimeout(title, 2500); return; } }
+        else { if (i > 1) i--; else back = false; }
+        setTimeout(title, back ? 90 : 180);
+      }
+      if (!reduce) title();
+
+      var link = document.getElementById('favicon'), img = new Image(), fc = document.createElement('canvas');
+      fc.width = fc.height = 64; var fx = fc.getContext('2d'), ph = 0;
+      img.onload = function () {
+        if (reduce) return;
+        setInterval(function () {
+          ph += 0.25;
+          fx.clearRect(0, 0, 64, 64);
+          fx.save(); fx.beginPath(); fx.arc(32, 32, 26, 0, 6.3); fx.clip();
+          fx.drawImage(img, 6, 6, 52, 52); fx.restore();
+          fx.beginPath(); fx.arc(32, 32, 29, 0, 6.3);
+          fx.lineWidth = 4; fx.strokeStyle = 'rgba(196,181,253,' + (0.35 + 0.35 * Math.sin(ph)) + ')'; fx.stroke();
+          link.href = fc.toDataURL('image/png');
+        }, 200);
+      };
+      img.src = 'favicon.png';
+    })();
+
+    /* ---------- drifting particles ---------- */
     var c = document.getElementById('bg'), x = c.getContext('2d'), P = [], W, H;
     function size() { W = c.width = innerWidth * devicePixelRatio; H = c.height = innerHeight * devicePixelRatio; }
     size(); addEventListener('resize', size);
-    for (var i = 0; i < 60; i++) P.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4, v: Math.random() * .0006 + .0002, o: Math.random() * .5 + .15 });
+    for (var k = 0; k < 60; k++) P.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.6 + .4, v: Math.random() * .0006 + .0002, o: Math.random() * .5 + .15 });
     function draw() {
       x.clearRect(0, 0, W, H);
       P.forEach(function (p) {
@@ -181,6 +229,78 @@
       if (!reduce) requestAnimationFrame(draw);
     }
     draw();
+
+    /* ---------- music: original ambient loop, synthesized live (no audio file, no licensing) ---------- */
+    var Music = (function () {
+      var ctx, master, playing = false, timer, step = 0;
+      var btn = document.getElementById('sound'), label = document.getElementById('soundLabel');
+      // Am7 - Fmaj7 - Cmaj7 - G6, slow and dreamy
+      var chords = [[57, 60, 64, 67], [53, 57, 60, 64], [48, 55, 59, 64], [55, 59, 62, 64]];
+      var BEAT = 0.42; // seconds per 8th note
+      function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+      function pad(notes, t, dur) {
+        notes.forEach(function (n) {
+          [0, 7].forEach(function (det) {
+            var o = ctx.createOscillator(), g = ctx.createGain();
+            o.type = 'triangle'; o.frequency.value = hz(n - 12); o.detune.value = det;
+            g.gain.setValueAtTime(0, t);
+            g.gain.linearRampToValueAtTime(0.022, t + 1.2);
+            g.gain.linearRampToValueAtTime(0, t + dur);
+            o.connect(g); g.connect(master.lp); o.start(t); o.stop(t + dur + 0.1);
+          });
+        });
+      }
+      function pluck(n, t) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = hz(n + 12);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.05, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+        o.connect(g); g.connect(master.delay); g.connect(master.lp); o.start(t); o.stop(t + 1.2);
+      }
+      function crackle() {
+        var len = ctx.sampleRate * 2, buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+        for (var i = 0; i < len; i++) d[i] = Math.random() < 0.0008 ? (Math.random() * 2 - 1) * 0.5 : (Math.random() * 2 - 1) * 0.004;
+        var s = ctx.createBufferSource(), g = ctx.createGain();
+        s.buffer = buf; s.loop = true; g.gain.value = 0.35; s.connect(g); g.connect(master.lp); s.start();
+      }
+      function schedule() {
+        var now = ctx.currentTime;
+        while (master.next < now + 0.6) {
+          var bar = Math.floor(step / 8) % chords.length, ch = chords[bar], pos = step % 8;
+          if (pos === 0) pad(ch, master.next, BEAT * 8 + 0.3);
+          var pattern = [0, 2, 1, 3, 2, 1, 3, 2];
+          if (pos !== 5 || Math.random() < 0.5) pluck(ch[pattern[pos]], master.next);
+          master.next += BEAT; step++;
+        }
+      }
+      function build() {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        master = ctx.createGain(); master.gain.value = 0;
+        var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = 0.4;
+        var delay = ctx.createDelay(); delay.delayTime.value = BEAT * 3;
+        var fb = ctx.createGain(); fb.gain.value = 0.35;
+        delay.connect(fb); fb.connect(delay); delay.connect(lp);
+        lp.connect(master); master.connect(ctx.destination);
+        master.lp = lp; master.delay = delay; master.next = ctx.currentTime + 0.1;
+        crackle();
+      }
+      function fade(to) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(to, ctx.currentTime, 0.6); }
+      function on() { playing = true; fade(0.9); btn.classList.remove('muted'); label.textContent = 'music on'; try { localStorage.setItem('tihvert-muted', '0'); } catch (e) {} }
+      function off() { playing = false; fade(0); btn.classList.add('muted'); label.textContent = 'music off'; try { localStorage.setItem('tihvert-muted', '1'); } catch (e) {} }
+      btn.addEventListener('click', function () { if (!ctx) return; playing ? off() : on(); });
+      return {
+        start: function () {
+          try {
+            build(); btn.classList.add('show');
+            timer = setInterval(schedule, 150); schedule();
+            var muted = false; try { muted = localStorage.getItem('tihvert-muted') === '1'; } catch (e) {}
+            muted ? off() : on();
+          } catch (e) { /* no Web Audio: page still works silently */ }
+        }
+      };
+    })();
   </script>
 </body>
 </html>
