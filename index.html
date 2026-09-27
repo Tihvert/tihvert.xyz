@@ -146,6 +146,9 @@
   <script>
     // Set your channel here, e.g. "https://www.youtube.com/@yourhandle". Empty = icon hidden.
     var YOUTUBE_URL = "";
+    // Background song from YouTube (official embed player, plays after "click to enter").
+    // Paste the video id, e.g. "dQw4w9WgXcQ". Empty = the built-in ambient loop plays instead.
+    var MUSIC_YOUTUBE_ID = "";
     if (YOUTUBE_URL) { var yt = document.getElementById('yt'); yt.href = YOUTUBE_URL; yt.hidden = false; }
 
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -289,9 +292,36 @@
       function fade(to) { master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setTargetAtTime(to, ctx.currentTime, 0.6); }
       function on() { playing = true; fade(0.9); btn.classList.remove('muted'); label.textContent = 'music on'; try { localStorage.setItem('tihvert-muted', '0'); } catch (e) {} }
       function off() { playing = false; fade(0); btn.classList.add('muted'); label.textContent = 'music off'; try { localStorage.setItem('tihvert-muted', '1'); } catch (e) {} }
-      btn.addEventListener('click', function () { if (!ctx) return; playing ? off() : on(); });
+      btn.addEventListener('click', function () {
+        if (yt) { playing ? ytOff() : ytOn(); return; }
+        if (!ctx) return; playing ? off() : on();
+      });
+
+      // YouTube song mode
+      var yt = null;
+      function ytOn() { playing = true; yt.unMute(); yt.setVolume(35); yt.playVideo(); btn.classList.remove('muted'); label.textContent = 'music on'; try { localStorage.setItem('tihvert-muted', '0'); } catch (e) {} }
+      function ytOff() { playing = false; yt.pauseVideo(); btn.classList.add('muted'); label.textContent = 'music off'; try { localStorage.setItem('tihvert-muted', '1'); } catch (e) {} }
+      function startYouTube(id) {
+        var holder = document.createElement('div'); holder.id = 'ytplayer';
+        holder.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:0;';
+        document.body.appendChild(holder);
+        window.onYouTubeIframeAPIReady = function () {
+          new YT.Player('ytplayer', {
+            videoId: id, width: 1, height: 1,
+            playerVars: { autoplay: 1, loop: 1, playlist: id, controls: 0, playsinline: 1 },
+            events: { onReady: function (e) {
+              yt = e.target; btn.classList.add('show');
+              var muted = false; try { muted = localStorage.getItem('tihvert-muted') === '1'; } catch (err) {}
+              muted ? ytOff() : ytOn();
+            } }
+          });
+        };
+        var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
+      }
+
       return {
         start: function () {
+          if (MUSIC_YOUTUBE_ID) { startYouTube(MUSIC_YOUTUBE_ID); return; }
           try {
             build(); btn.classList.add('show');
             timer = setInterval(schedule, 150); schedule();
