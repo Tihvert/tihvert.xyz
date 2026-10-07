@@ -203,7 +203,17 @@
     #pp svg { width: 14px; height: 14px; fill: currentColor; }
     .pl-info { flex: 1; min-width: 0; }
     .pl-title { display: flex; align-items: center; gap: 8px; color: var(--text); }
-    .pl-title span:last-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* song name: ellipsis by default, scrolls in a seamless loop when it does not fit */
+    .pl-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .pl-name.scroll {
+      text-overflow: clip;
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 14px), transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 14px), transparent 100%);
+    }
+    .pl-track { display: inline-block; }
+    .pl-name.scroll .pl-track { animation: marquee var(--mq-dur, 10s) linear infinite; }
+    #player.paused .pl-name.scroll .pl-track { animation-play-state: paused; }
+    @keyframes marquee { 0%, 15% { transform: translateX(0); } 100% { transform: translateX(var(--mq-dist, 0)); } }
     .eq { display: flex; gap: 2px; align-items: flex-end; height: 11px; flex: none; }
     .eq i { width: 2px; background: var(--accent); animation: eq 1s ease-in-out infinite; }
     .eq i:nth-child(2) { animation-delay: .2s; } .eq i:nth-child(3) { animation-delay: .4s; }
@@ -298,7 +308,7 @@
   <div id="player" class="paused" role="region" aria-label="Music player">
     <button id="pp" type="button" aria-label="Play music"></button>
     <div class="pl-info">
-      <div class="pl-title"><span class="eq"><i></i><i></i><i></i></span><span id="plTitle">…</span></div>
+      <div class="pl-title"><span class="eq"><i></i><i></i><i></i></span><span class="pl-name" id="plName"><span class="pl-track" id="plTitle">…</span></span></div>
       <div class="pl-bar" id="plBar"><i id="plProg"></i></div>
     </div>
     <input id="vol" type="range" min="0" max="100" value="35" aria-label="Volume">
@@ -687,6 +697,24 @@
       try { var sv = parseInt(localStorage.getItem('tihvert-vol'), 10); if (sv >= 0 && sv <= 100) v = sv; } catch (e) {}
       vol.value = v;
 
+      // Song name: when it is wider than its box, show "name · name" and slide by exactly one
+      // "name · " so the loop is seamless; speed ~30 px/s.
+      var nameBox = $('plName');
+      function fitTitle() {
+        var text = title.dataset.text || title.textContent;
+        nameBox.classList.remove('scroll'); title.textContent = text;
+        if (reduce || title.offsetWidth <= nameBox.clientWidth) return;
+        var single = title.offsetWidth;
+        title.textContent = text + ' · ' + text;
+        var unit = title.offsetWidth - single;
+        nameBox.style.setProperty('--mq-dist', -unit + 'px');
+        nameBox.style.setProperty('--mq-dur', (unit / 30 / 0.85).toFixed(1) + 's');
+        nameBox.classList.add('scroll');
+      }
+      function setTitle(text) { title.dataset.text = text; fitTitle(); }
+      addEventListener('resize', function () { if (player.classList.contains('show')) fitTitle(); });
+      if (document.fonts) document.fonts.ready.then(function () { if (player.classList.contains('show')) fitTitle(); });
+
       function ui() {
         pp.innerHTML = playing ? PAUSE : PLAY;
         pp.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
@@ -777,7 +805,7 @@
         prog.style.width = (d ? c / d * 100 : 0) + '%';
         if (!titleSet && !MUSIC_TITLE && ytp.getVideoData) {
           var vd = ytp.getVideoData();
-          if (vd && vd.title) { title.textContent = vd.title; titleSet = true; }
+          if (vd && vd.title) { setTitle(vd.title); titleSet = true; }
         }
       }, 500);
       function startYouTube(id) {
@@ -792,8 +820,8 @@
             events: {
               onReady: function (e) {
                 ytp = e.target; mode = 'yt';
-                title.textContent = MUSIC_TITLE || 'loading…';
                 bar.classList.remove('live'); player.classList.add('show');
+                setTitle(MUSIC_TITLE || 'loading…');
                 wasMuted() ? pause() : play();
               },
               // embedding blocked / video gone: fall back to the built-in ambient loop
@@ -807,8 +835,8 @@
       function startSynth() {
         try {
           build(); mode = 'synth';
-          title.textContent = 'ambient loop · original';
           bar.classList.add('live'); player.classList.add('show');
+          setTitle('ambient loop · original');
           setInterval(schedule, 150); schedule();
           wasMuted() ? pause() : play();
         } catch (e) { /* no Web Audio: page still works silently */ }
