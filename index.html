@@ -299,8 +299,8 @@
     var MUSIC_YOUTUBE_ID = "";
     // Optional song name shown in the player; empty = the YouTube video title.
     var MUSIC_TITLE = "";
-    // Discord account whose live status is shown (needs to be in the Lanyard Discord server).
-    var DISCORD_ID = "1015157576687698030";
+    // Live Discord status from our own bot "Lassin Passi" (runs on the relay, sits in Riksun S-Market).
+    var STATUS_API = "https://status.tihvert.xyz";
 
     function $(id) { return document.getElementById(id); }
     var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -526,7 +526,7 @@
       })();
     })();
 
-    /* ---------- live Discord presence via Lanyard ---------- */
+    /* ---------- live Discord presence from status.tihvert.xyz (Lanyard-compatible data) ---------- */
     var Presence = (function () {
       var box = $('presence'), sdot = $('sdot'), stxt = $('statusText'), cst = $('cstatus');
       var act = $('act'), actImg = $('actImg'), actIcon = $('actIcon'), actKind = $('actKind'), actName = $('actName'), actSub = $('actSub'), actTime = $('actTime');
@@ -534,7 +534,7 @@
       var idle = $('pidle');
       var LABEL = { online: 'online', idle: 'idle', dnd: 'do not disturb', offline: 'offline' };
       var KIND = { 0: 'playing', 1: 'streaming', 2: 'listening to', 3: 'watching', 5: 'competing in' };
-      var cur = null, ws = null, hb = null, retry = 0;
+      var cur = null;
 
       function asset(img, appId) {
         if (!img) return '';
@@ -616,29 +616,25 @@
       }
       setInterval(update, 1000);
 
-      function connect() {
-        try { ws = new WebSocket('wss://api.lanyard.rest/socket'); } catch (e) { return; }
-        ws.onmessage = function (ev) {
-          var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
-          if (m.op === 1) {
-            clearInterval(hb);
-            hb = setInterval(function () { if (ws.readyState === 1) ws.send(JSON.stringify({ op: 3 })); }, m.d.heartbeat_interval);
-            ws.send(JSON.stringify({ op: 2, d: { subscribe_to_id: DISCORD_ID } }));
-          } else if (m.op === 0 && (m.t === 'INIT_STATE' || m.t === 'PRESENCE_UPDATE')) {
-            retry = 0; render(m.d);
-          }
+      // Live updates: server-sent events push a new snapshot on every change (EventSource reconnects by itself).
+      function live() {
+        if (!window.EventSource) return;
+        var es = new EventSource(STATUS_API + '/v1/stream');
+        es.onmessage = function (ev) {
+          var d; try { d = JSON.parse(ev.data); } catch (e) { return; }
+          render(d);
         };
-        ws.onclose = function () { clearInterval(hb); setTimeout(connect, Math.min(60000, 2000 * Math.pow(2, retry++))); };
       }
 
       return {
         render: render,
         start: function () {
-          if (!DISCORD_ID || !window.fetch) return;
-          fetch('https://api.lanyard.rest/v1/users/' + DISCORD_ID)
+          if (!STATUS_API || !window.fetch) return;
+          fetch(STATUS_API + '/v1/presence')
             .then(function (r) { return r.json(); })
-            .then(function (j) { if (j && j.success) { render(j.data); connect(); } })
-            .catch(function () { /* Lanyard down or not monitored: card simply has no live block */ });
+            .then(function (j) { if (j && j.success) render(j.data); })
+            .catch(function () { /* bot offline: the card simply has no live block until the stream reconnects */ })
+            .then(live);
         }
       };
     })();
