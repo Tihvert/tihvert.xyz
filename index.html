@@ -808,24 +808,27 @@
           if (vd && vd.title) { setTitle(vd.title); titleSet = true; }
         }
       }, 500);
-      function startYouTube(id) {
+      // The YouTube player is preloaded (silent, no autoplay) while the gate is still showing,
+      // so the song starts the moment the visitor clicks "enter" instead of loading only then.
+      var entered = false, ytReady = false, ytFailed = false;
+      function beginYouTube() {
+        mode = 'yt';
+        bar.classList.remove('live'); player.classList.add('show');
+        setTitle(MUSIC_TITLE || 'loading…');
+        wasMuted() ? pause() : play();
+      }
+      function preloadYouTube(id) {
         var holder = document.createElement('div'); holder.id = 'ytplayer';
         holder.style.cssText = 'position:fixed;width:1px;height:1px;left:-9999px;top:0;';
         document.body.appendChild(holder);
         window.onYouTubeIframeAPIReady = function () {
           new YT.Player('ytplayer', {
             videoId: id, width: 1, height: 1,
-            // no autoplay at all for visitors who muted before, so not even a blip of sound
-            playerVars: { autoplay: wasMuted() ? 0 : 1, loop: 1, playlist: id, controls: 0, playsinline: 1 },
+            playerVars: { autoplay: 0, loop: 1, playlist: id, controls: 0, playsinline: 1 },
             events: {
-              onReady: function (e) {
-                ytp = e.target; mode = 'yt';
-                bar.classList.remove('live'); player.classList.add('show');
-                setTitle(MUSIC_TITLE || 'loading…');
-                wasMuted() ? pause() : play();
-              },
+              onReady: function (e) { ytp = e.target; ytReady = true; if (entered && !mode) beginYouTube(); },
               // embedding blocked / video gone: fall back to the built-in ambient loop
-              onError: function () { if (mode !== 'synth') { mode = null; startSynth(); } }
+              onError: function () { ytFailed = true; if (entered && mode !== 'synth') { mode = null; startSynth(); } }
             }
           });
         };
@@ -843,10 +846,15 @@
       }
 
       ui();
+      if (MUSIC_YOUTUBE_ID) preloadYouTube(MUSIC_YOUTUBE_ID);
       return {
+        // called from the "click to enter" handler, i.e. inside the user gesture that allows sound
         start: function () {
-          if (MUSIC_YOUTUBE_ID) startYouTube(MUSIC_YOUTUBE_ID);
-          else startSynth();
+          if (entered) return;
+          entered = true;
+          if (!MUSIC_YOUTUBE_ID || ytFailed) startSynth();
+          else if (ytReady) beginYouTube();
+          // otherwise onReady starts it as soon as the player has finished loading
         }
       };
     })();
