@@ -309,9 +309,9 @@
     var YOUTUBE_URL = "";
     // Background song from YouTube (official embed player, plays after "click to enter").
     // Paste the video id, e.g. "dQw4w9WgXcQ". Empty = the built-in ambient loop plays instead.
-    var MUSIC_YOUTUBE_ID = "";
+    var MUSIC_YOUTUBE_ID = "2a8PgqWrc_4"; // Travis Scott - STARGAZING (Audio), official TravisScottVEVO upload
     // Optional song name shown in the player; empty = the YouTube video title.
-    var MUSIC_TITLE = "";
+    var MUSIC_TITLE = "Travis Scott — STARGAZING";
     // Live Discord status from our own bot "Lassin Passi" (runs on the relay, sits in Riksun S-Market).
     var STATUS_API = "https://status.tihvert.xyz";
 
@@ -787,29 +787,38 @@
         window.onYouTubeIframeAPIReady = function () {
           new YT.Player('ytplayer', {
             videoId: id, width: 1, height: 1,
-            playerVars: { autoplay: 1, loop: 1, playlist: id, controls: 0, playsinline: 1 },
-            events: { onReady: function (e) {
-              ytp = e.target; mode = 'yt';
-              title.textContent = MUSIC_TITLE || 'loading…';
-              bar.classList.remove('live'); player.classList.add('show');
-              wasMuted() ? pause() : play();
-            } }
+            // no autoplay at all for visitors who muted before, so not even a blip of sound
+            playerVars: { autoplay: wasMuted() ? 0 : 1, loop: 1, playlist: id, controls: 0, playsinline: 1 },
+            events: {
+              onReady: function (e) {
+                ytp = e.target; mode = 'yt';
+                title.textContent = MUSIC_TITLE || 'loading…';
+                bar.classList.remove('live'); player.classList.add('show');
+                wasMuted() ? pause() : play();
+              },
+              // embedding blocked / video gone: fall back to the built-in ambient loop
+              onError: function () { if (mode !== 'synth') { mode = null; startSynth(); } }
+            }
           });
         };
         var s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
       }
 
+      function startSynth() {
+        try {
+          build(); mode = 'synth';
+          title.textContent = 'ambient loop · original';
+          bar.classList.add('live'); player.classList.add('show');
+          setInterval(schedule, 150); schedule();
+          wasMuted() ? pause() : play();
+        } catch (e) { /* no Web Audio: page still works silently */ }
+      }
+
       ui();
       return {
         start: function () {
-          if (MUSIC_YOUTUBE_ID) { startYouTube(MUSIC_YOUTUBE_ID); return; }
-          try {
-            build(); mode = 'synth';
-            title.textContent = 'ambient loop · original';
-            bar.classList.add('live'); player.classList.add('show');
-            setInterval(schedule, 150); schedule();
-            wasMuted() ? pause() : play();
-          } catch (e) { /* no Web Audio: page still works silently */ }
+          if (MUSIC_YOUTUBE_ID) startYouTube(MUSIC_YOUTUBE_ID);
+          else startSynth();
         }
       };
     })();
