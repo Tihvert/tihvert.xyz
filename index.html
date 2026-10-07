@@ -5,7 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tihvert</title>
   <meta name="description" content="Tihvert. Writes code, breaks code, occasionally fixes it.">
-  <meta name="theme-color" content="#050507">
+  <!-- theme-color doubles as the colour bar of the Discord link embed -->
+  <meta name="theme-color" content="#5b21b6">
+  <link rel="canonical" href="https://tihvert.xyz/">
+  <!-- link previews (Discord, Telegram, X, ...) -->
+  <meta property="og:type" content="profile">
+  <meta property="og:site_name" content="tihvert.xyz">
+  <meta property="og:url" content="https://tihvert.xyz/">
+  <meta property="og:title" content="Tihvert">
+  <meta property="og:description" content="Writes code, breaks code, occasionally fixes it. 📍 Finland">
+  <meta property="og:image" content="https://tihvert.xyz/avatar.png">
+  <meta property="og:image:width" content="256">
+  <meta property="og:image:height" content="256">
+  <meta property="og:image:alt" content="Tihvert's avatar">
+  <meta name="twitter:card" content="summary">
   <link rel="icon" id="favicon" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -534,7 +547,7 @@
       var idle = $('pidle');
       var LABEL = { online: 'online', idle: 'idle', dnd: 'do not disturb', offline: 'offline' };
       var KIND = { 0: 'playing', 1: 'streaming', 2: 'listening to', 3: 'watching', 5: 'competing in' };
-      var cur = null;
+      var cur = null, idleBase = '';
 
       function asset(img, appId) {
         if (!img) return '';
@@ -546,6 +559,16 @@
       function fmt(ms) {
         var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
         return (h ? h + ':' + (m < 10 ? '0' : '') + m : m) + ':' + (x < 10 ? '0' : '') + x;
+      }
+      function dur(ms) {
+        var m = Math.floor(ms / 60000), h = Math.floor(m / 60);
+        return h ? h + ' h ' + (m % 60) + ' min' : m + ' min';
+      }
+      // seconds played today for one game: finished sessions + the running one (bot-side tracking)
+      function todayMs(name, now) {
+        var pt = cur && cur.playtime; if (!pt) return 0;
+        var ms = ((pt.today && pt.today[name]) || 0) * 1000, a = pt.active && pt.active[name];
+        return a ? ms + Math.max(0, now - a.since) : ms;
       }
       function find(list, test) { for (var i = 0; i < list.length; i++) if (test(list[i])) return list[i]; return null; }
 
@@ -596,7 +619,8 @@
         }
 
         idle.hidden = !!(game || sp2);
-        idle.textContent = st === 'offline' ? 'offline right now. probably asleep.' : 'not doing anything right now.';
+        idleBase = st === 'offline' ? 'offline right now. probably asleep.' : 'not doing anything right now.';
+        idle.textContent = idleBase;
         box.hidden = false;
         update();
       }
@@ -605,8 +629,20 @@
         if (!cur) return;
         var now = Date.now(), acts = cur.activities || [];
         var game = find(acts, function (x) { return x.type !== 4 && x.name !== 'Spotify'; });
-        if (game && game.timestamps && game.timestamps.start) actTime.textContent = fmt(now - game.timestamps.start) + ' elapsed';
-        else actTime.textContent = '';
+        var pt = cur.playtime;
+        if (game) {
+          var parts = [], act0 = pt && pt.active && pt.active[game.name];
+          var start = (game.timestamps && game.timestamps.start) || (act0 && act0.start);
+          if (start) parts.push(fmt(now - start) + ' elapsed');
+          var td = todayMs(game.name, now);
+          if (td >= 60000) parts.push(dur(td) + ' today');
+          actTime.textContent = parts.join(' · ');
+        } else actTime.textContent = '';
+        if (!game && !(cur.listening_to_spotify && cur.spotify) && pt && pt.today) {
+          var best = null, bestMs = 0;
+          for (var g in pt.today) { var v = todayMs(g, now); if (v > bestMs) { best = g; bestMs = v; } }
+          if (best && bestMs >= 60000) idle.textContent = idleBase + ' today: ' + best + ' for ' + dur(bestMs) + '.';
+        }
         var sp = cur.listening_to_spotify && cur.spotify;
         if (sp && sp.timestamps) {
           var total = sp.timestamps.end - sp.timestamps.start, done = Math.min(total, now - sp.timestamps.start);
