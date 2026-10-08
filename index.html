@@ -1046,11 +1046,35 @@
       }
       var LOGO = [
         '   .-"""-.    ', '  /  .-.  \\   ', ' |  ( ☄ )  |  ', '  \\  `-\'  /   ', '   `-...-\'    '];
+      // accent colour themes (`theme red`); the choice is remembered in this browser
+      var THEMES = { purple: '#c4b5fd', red: '#fb7185', green: '#6ee7b7', blue: '#7dd3fc', gold: '#fcd34d', pink: '#f9a8d4', orange: '#fdba74' };
+      function applyTheme(name) { document.documentElement.style.setProperty('--accent', THEMES[name]); }
+      try { var saved = localStorage.getItem('tihvert-theme'); if (saved && THEMES[saved]) applyTheme(saved); } catch (e) {}
+      function matrixRain() {
+        var c = document.createElement('canvas'), x = c.getContext('2d'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+        c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:8;pointer-events:none;transition:opacity 1.2s ease';
+        c.width = innerWidth * dpr; c.height = innerHeight * dpr; document.body.appendChild(c);
+        x.scale(dpr, dpr);
+        var size = 16, cols = Math.ceil(innerWidth / size), drops = [], chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ0123456789☄';
+        for (var i = 0; i < cols; i++) drops.push(Math.random() * -40);
+        x.font = size + 'px JetBrains Mono, monospace';
+        var t0 = performance.now();
+        (function step(now) {
+          x.fillStyle = 'rgba(0,0,0,.09)'; x.fillRect(0, 0, innerWidth, innerHeight);
+          x.fillStyle = '#6ee7b7';
+          for (var i = 0; i < cols; i++) {
+            if (drops[i] >= 0) x.fillText(chars[Math.floor(Math.random() * chars.length)], i * size, drops[i] * size);
+            if (drops[i] * size > innerHeight && Math.random() > .975) drops[i] = 0; else drops[i] += .6;
+          }
+          if (now - t0 < 6500) requestAnimationFrame(step);
+          else { c.style.opacity = '0'; setTimeout(function () { c.remove(); }, 1300); }
+        })(t0);
+      }
       var CMDS = {
         help: function () {
           print('commands:', 'c');
           print('  whoami     who is this guy\n  neofetch   the machine\n  projects   what i build\n  discord    copy my discord username\n  weather    helsinki right now\n  music      play / pause the song\n  views      how many have been here\n  clear      clean the screen\n  exit       close the terminal');
-          print('  msg <text> leave me a message (300 chars, 1 per hour)');
+          print('  msg <text> leave me a message (300 chars, 1 per hour)\n  theme <c>  purple red green blue gold pink orange\n  play <x>   next / prev / pause / resume\n  song       what is playing\n  matrix     take the red pill');
           print('  (there are a few more. good luck.)', 'm');
         },
         whoami: function () {
@@ -1084,6 +1108,26 @@
               else print('could not send it. try again later.', 'm');
             })
             .catch(function () { print('could not reach the server.', 'm'); });
+        },
+        theme: function (arg) {
+          var n = (arg || '').toLowerCase().trim();
+          if (!THEMES[n]) { print('themes: ' + Object.keys(THEMES).join(' ') + '\nusage: theme red', 'm'); return; }
+          applyTheme(n); try { localStorage.setItem('tihvert-theme', n); } catch (e) {}
+          print('theme: ' + n, 'g');
+        },
+        matrix: function () {
+          if (reduce) { print('wake up, neo. (animations are off in your settings)', 'm'); return; }
+          print('wake up, neo...', 'g'); matrixRain();
+        },
+        song: function () { print('♪ ' + ($('plTitle').dataset.text || 'nothing yet')); },
+        play: function (arg) {
+          var a = (arg || '').toLowerCase().trim(), paused = $('player').classList.contains('paused');
+          if (a === 'next') $('nextBtn').click();
+          else if (a === 'prev' || a === 'previous') $('prevBtn').click();
+          else if (a === 'pause' || a === 'stop') { if (!paused) $('pp').click(); }
+          else if (a === 'resume' || a === 'start' || a === '') { if (paused) $('pp').click(); }
+          else { print('usage: play next | prev | pause | resume', 'm'); return; }
+          setTimeout(function () { CMDS.song(); }, 400);
         },
         weather: function () { var w = $('wx'); print(w.hidden ? 'no weather data yet.' : w.title); },
         music: function () { $('pp').click(); print('toggled.', 'm'); },
