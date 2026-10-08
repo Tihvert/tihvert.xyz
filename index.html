@@ -1050,6 +1050,7 @@
         help: function () {
           print('commands:', 'c');
           print('  whoami     who is this guy\n  neofetch   the machine\n  projects   what i build\n  discord    copy my discord username\n  weather    helsinki right now\n  music      play / pause the song\n  views      how many have been here\n  clear      clean the screen\n  exit       close the terminal');
+          print('  msg <text> leave me a message (300 chars, 1 per hour)');
           print('  (there are a few more. good luck.)', 'm');
         },
         whoami: function () {
@@ -1066,11 +1067,24 @@
           print('⛏  Riksun S-Market  minecraft server for the boys (private)');
           print('🛂 Lassin Passi     discord bot with a bad attitude');
           print('🌌 tihvert.xyz      you are here');
-          print('💀 Ripehook.xyz         old project · discontinued', 'm');
+          print('💀 Ripehook         old project · discontinued', 'm');
         },
         discord: function () {
           var name = Presence.username() || 'tihvert';
           copy(name).then(function (ok) { print(ok ? 'copied: ' + name : 'discord: ' + name, 'g'); });
+        },
+        msg: function (text) {
+          if (!text) { print('usage: msg <your message>   (max 300 characters, one per hour)', 'm'); return; }
+          if (text.length > 300) { print('too long: ' + text.length + ' / 300 characters.', 'm'); return; }
+          if (!STATUS_API || !window.fetch) { print('cannot send from this browser.', 'm'); return; }
+          print('sending...', 'm');
+          fetch(STATUS_API + '/v1/msg', { method: 'POST', body: text })
+            .then(function (res) {
+              if (res.ok) print('sent. he will see it.', 'g');
+              else if (res.status === 429) print('slow down: one message per hour.', 'm');
+              else print('could not send it. try again later.', 'm');
+            })
+            .catch(function () { print('could not reach the server.', 'm'); });
         },
         weather: function () { var w = $('wx'); print(w.hidden ? 'no weather data yet.' : w.title); },
         music: function () { $('pp').click(); print('toggled.', 'm'); },
@@ -1095,7 +1109,7 @@
         hist.push(raw); hi = hist.length;
         var key = cmd.toLowerCase(), fn = CMDS[key] || CMDS[key.split(' ')[0]];
         if (key.indexOf('sudo ') === 0) fn = CMDS.sudo;
-        if (fn) fn(); else print(cmd.split(' ')[0] + ': command not found. try help', 'm');
+        if (fn) fn(cmd.indexOf(' ') > 0 ? cmd.slice(cmd.indexOf(' ') + 1) : ''); else print(cmd.split(' ')[0] + ': command not found. try help', 'm');
       }
       function open() {
         term.hidden = false;
