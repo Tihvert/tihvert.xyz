@@ -347,7 +347,7 @@
         </div>
         <p class="pidle" id="pidle" hidden></p>
         <div class="pcard week" id="week" hidden>
-          <div class="whead"><span class="pkind">played this week</span><span class="ptime" id="weekTotal"></span></div>
+          <div class="whead"><span class="pkind">this week</span><span class="ptime" id="weekTotal"></span></div>
           <div class="wbars" id="weekBars"></div>
           <div class="wlegend" id="weekLegend"></div>
         </div>
@@ -664,6 +664,10 @@
       var week = $('week'), weekBars = $('weekBars'), weekTotal = $('weekTotal'), weekLegend = $('weekLegend');
       var SEG = ['var(--accent)', 'var(--aur1)', 'var(--aur3)'], OTHER = 'var(--faint)';
       var WD = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
+      // logos for apps Discord has no icon for (the PC tracker reports them); emoji when there is none
+      var APP_ICONS = { 'Spotify': 'https://cdn.simpleicons.org/spotify/1DB954', 'Roblox': 'https://cdn.simpleicons.org/roblox/ffffff',
+                        'Roblox Studio': 'https://cdn.simpleicons.org/robloxstudio/00A2FF' };
+      var CAT_EMOJI = { music: '🎵', code: '💻', game: '🎮' };
       function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
       function renderWeek(now) {
         var pt = cur && cur.playtime;
@@ -711,9 +715,14 @@
         });
         weekLegend.textContent = '';
         top.forEach(function (n) {
-          var s = document.createElement('span'), dot = document.createElement('b'), icon = pt.icons && pt.icons[n];
+          var s = document.createElement('span'), dot = document.createElement('b');
+          var icon = (pt.icons && pt.icons[n]) || APP_ICONS[n], emoji = CAT_EMOJI[(pt.cats && pt.cats[n]) || 'game'];
           dot.style.background = color(n); s.appendChild(dot);
-          if (icon) { var im = document.createElement('img'); im.src = icon; im.alt = ''; im.loading = 'lazy'; s.appendChild(im); }
+          if (icon) {
+            var im = document.createElement('img'); im.src = icon; im.alt = ''; im.loading = 'lazy';
+            im.onerror = function () { this.replaceWith(document.createTextNode(emoji + ' ')); };
+            s.appendChild(im);
+          } else s.appendChild(document.createTextNode(emoji + ' '));
           s.appendChild(document.createTextNode(n + ' ' + dur(totals[n])));
           weekLegend.appendChild(s);
         });
