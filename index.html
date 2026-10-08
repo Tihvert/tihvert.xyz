@@ -478,8 +478,9 @@
     av.addEventListener('click', function () {
       clicks++;
       egg.textContent = msgs[Math.min(clicks, msgs.length - 1)];
-      if (clicks < 5) { av.classList.remove('poke'); void av.offsetWidth; av.classList.add('poke'); }  // every click reacts right away
-      if (clicks >= 5) { av.classList.remove('spin'); void av.offsetWidth; av.classList.add('spin'); clicks = 0; setTimeout(function () { egg.textContent = ''; }, 1500); }
+      av.classList.remove('poke', 'spin'); void av.offsetWidth;  // restart whichever animation plays now
+      if (clicks < 5) av.classList.add('poke');  // every click reacts right away
+      else { av.classList.add('spin'); clicks = 0; setTimeout(function () { egg.textContent = ''; }, 1500); }  // the 5th click: full spin
     });
     av.addEventListener('error', function () { if (av.getAttribute('src') !== 'avatar.png') av.src = 'avatar.png'; });
 
@@ -1086,10 +1087,13 @@
           for (var i = 0; i < info.length; i++) print((LOGO[i] || '              ') + '  ' + info[i], i === 0 ? 'c' : '');
         },
         projects: function () {
-          print('☄  CATCH A METEOR   roblox game · coming soon', 'g');
-          print('🤖 Discord bots     a few of them, built and running');
-          print('🌌 tihvert.xyz      you are here');
-          print('💀 Ripehook.xyz         old project · discontinued', 'm');
+          // emoji widths differ between systems, so the name column is padded after a fixed-size emoji slot
+          [['☄️', 'CATCH A METEOR', 'roblox game · coming soon', 'g'],
+           ['🤖', 'Discord bots', 'a few of them, built and running', ''],
+           ['🌌', 'tihvert.xyz', 'you are here', ''],
+           ['💀', 'Ripehook.xyz', 'old project · discontinued', 'm']].forEach(function (r) {
+            print(r[0] + '  ' + r[1] + new Array(Math.max(3, 20 - r[1].length)).join(' ') + r[2], r[3]);
+          });
         },
         discord: function () {
           var name = Presence.username() || 'tihvert';
