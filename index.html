@@ -183,6 +183,7 @@
     .wlegend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .wlegend span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .wlegend b { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+    .wlegend img { width: 14px; height: 14px; border-radius: 4px; margin-right: 5px; vertical-align: middle; object-fit: cover; }
 
     .icons { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
     .icons a {
@@ -644,8 +645,9 @@
         });
         weekLegend.textContent = '';
         top.forEach(function (n) {
-          var s = document.createElement('span'), dot = document.createElement('b');
+          var s = document.createElement('span'), dot = document.createElement('b'), icon = pt.icons && pt.icons[n];
           dot.style.background = color(n); s.appendChild(dot);
+          if (icon) { var im = document.createElement('img'); im.src = icon; im.alt = ''; im.loading = 'lazy'; s.appendChild(im); }
           s.appendChild(document.createTextNode(n + ' ' + dur(totals[n])));
           weekLegend.appendChild(s);
         });
