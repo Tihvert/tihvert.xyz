@@ -398,6 +398,15 @@
     var MUSIC_TITLE = "Travis Scott — STARGAZING";
     // ASTROWORLD cover, linked from Spotify's own image CDN (official art, not re-hosted here)
     var MUSIC_COVER = "https://i.scdn.co/image/ab67616d00001e02daec894c14c0ca42d76eeb32";
+    // after STARGAZING the player goes through these, then starts over (official, embeddable uploads;
+    // covers linked from Apple's image CDN, nothing re-hosted)
+    var MUSIC_PLAYLIST = [
+      { id: MUSIC_YOUTUBE_ID, title: MUSIC_TITLE, cover: MUSIC_COVER },
+      { id: "BAdLRRbzOv4", title: "Bag Raiders — Shooting Stars",
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/02/0a/04/020a04be-9707-9269-95e9-9822feee23a0/10UMGIM23712.rgb.jpg/300x300bb.jpg" },
+      { id: "pildU9lK6vM", title: "Travis Scott — MY EYES",
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/7d/4f/94/7d4f9468-56e1-3a2d-7186-c8088170ef58/196871341899.jpg/300x300bb.jpg" }
+    ];
     // Live Discord status from our own bot "Lassin Passi" (runs on the relay, sits in Riksun S-Market).
     var STATUS_API = "https://status.tihvert.xyz";
 
@@ -413,7 +422,16 @@
       gate.classList.add('gone'); stage.classList.add('in'); startTyping(); Music.start(); Views.hit();
     }
     gate.addEventListener('click', enter);
-    gate.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') enter(); });
+    // Space / Enter anywhere opens the gate; after that Space plays / pauses the music
+    addEventListener('keydown', function (e) {
+      var t = e.target, typing = /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable;
+      if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!gate.classList.contains('gone')) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enter(); }
+      } else if (e.key === ' ' && !/^(BUTTON|A)$/.test(t.tagName) && $('term').hidden) {
+        e.preventDefault(); $('pp').click();
+      }
+    });
 
     /* ---------- typewriter bio ---------- */
     var lines = ['writes code.', 'breaks code.', 'fixes the code that broke.', 'debugging at 3am.', 'probably asleep.', 'touching grass (rarely).'];
@@ -1180,12 +1198,19 @@
       // The YouTube player is preloaded while the gate is still showing, and "primed": it starts
       // muted (browsers allow muted autoplay), and the moment audio is flowing it is paused back at
       // 0:00. The opening seconds are then already buffered, so "enter" starts the song instantly.
-      var entered = false, ytReady = false, ytFailed = false, priming = false;
+      var entered = false, ytReady = false, ytFailed = false, priming = false, track = 0;
+      function showTrack(t) {
+        setTitle(t.title || 'loading…');
+        var art = $('plArt'); if (t.cover) { art.src = t.cover; art.hidden = false; } else art.hidden = true;
+      }
+      function nextTrack() {
+        track = (track + 1) % MUSIC_PLAYLIST.length;
+        showTrack(MUSIC_PLAYLIST[track]); ytp.loadVideoById(MUSIC_PLAYLIST[track].id);
+      }
       function beginYouTube() {
         mode = 'yt';
         bar.classList.remove('live'); player.classList.add('show');
-        setTitle(MUSIC_TITLE || 'loading…');
-        if (MUSIC_COVER) { var art = $('plArt'); art.src = MUSIC_COVER; art.hidden = false; }
+        showTrack(MUSIC_PLAYLIST[0]);
         if (priming) { priming = false; ytp.seekTo(0, true); }  // clicked mid-prime: restart from the top
         wasMuted() ? pause() : play();
       }
@@ -1196,7 +1221,7 @@
         window.onYouTubeIframeAPIReady = function () {
           new YT.Player('ytplayer', {
             videoId: id, width: 1, height: 1,
-            playerVars: { autoplay: 0, loop: 1, playlist: id, controls: 0, playsinline: 1 },
+            playerVars: { autoplay: 0, controls: 0, playsinline: 1 },
             events: {
               onReady: function (e) {
                 ytp = e.target; ytReady = true;
@@ -1205,9 +1230,13 @@
               },
               onStateChange: function (e) {
                 if (priming && e.data === YT.PlayerState.PLAYING) { priming = false; ytp.pauseVideo(); ytp.seekTo(0, true); }
+                else if (mode === 'yt' && e.data === YT.PlayerState.ENDED) nextTrack();  // song over: next one, then loop
               },
-              // embedding blocked / video gone: fall back to the built-in ambient loop
-              onError: function () { ytFailed = true; if (entered && mode !== 'synth') { mode = null; startSynth(); } }
+              // a later song unavailable: skip it; the first one blocked: fall back to the built-in ambient loop
+              onError: function () {
+                if (mode === 'yt' && track > 0) { nextTrack(); return; }
+                ytFailed = true; if (entered && mode !== 'synth') { mode = null; startSynth(); }
+              }
             }
           });
         };
