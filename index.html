@@ -170,6 +170,19 @@
     .pbar i { display: block; height: 100%; width: 0; background: var(--spotify); transition: width 1s linear; }
     .ptimes { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
     .pidle { font-size: 11px; color: var(--faint); text-align: center; padding: 4px 0; }
+    /* this week's playtime: one stacked bar per day, top games coloured */
+    .pcard.week { display: block; padding: 10px 12px; }
+    .whead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .whead .ptime { margin-top: 0; }
+    .wbars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
+    .wcol { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+    .wbar { width: 100%; max-width: 22px; height: 44px; display: flex; flex-direction: column-reverse; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, .04); }
+    .wbar i { display: block; width: 100%; flex: none; transition: height .6s ease; }
+    .wday { font-size: 9px; color: var(--faint); }
+    .wday.now { color: var(--accent); }
+    .wlegend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .wlegend span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+    .wlegend b { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
     .icons { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
     .icons a {
@@ -287,6 +300,11 @@
           </div>
         </div>
         <p class="pidle" id="pidle" hidden></p>
+        <div class="pcard week" id="week" hidden>
+          <div class="whead"><span class="pkind">played this week</span><span class="ptime" id="weekTotal"></span></div>
+          <div class="wbars" id="weekBars"></div>
+          <div class="wlegend" id="weekLegend"></div>
+        </div>
       </section>
 
       <nav class="icons">
@@ -573,7 +591,7 @@
       }
       function dur(ms) {
         var m = Math.floor(ms / 60000), h = Math.floor(m / 60);
-        return h ? h + ' h ' + (m % 60) + ' min' : m + ' min';
+        return h ? h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '') : m + ' min';
       }
       // seconds played today for one game: finished sessions + the running one (bot-side tracking)
       function todayMs(name, now) {
@@ -582,6 +600,58 @@
         return a ? ms + Math.max(0, now - a.since) : ms;
       }
       function find(list, test) { for (var i = 0; i < list.length; i++) if (test(list[i])) return list[i]; return null; }
+
+      // "played this week": the six previous days come from the bot's history, today is live (todayMs)
+      var week = $('week'), weekBars = $('weekBars'), weekTotal = $('weekTotal'), weekLegend = $('weekLegend');
+      var SEG = ['var(--accent)', 'var(--aur1)', 'var(--aur3)'], OTHER = 'var(--faint)';
+      var WD = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+      function renderWeek(now) {
+        var pt = cur && cur.playtime;
+        if (!pt || !pt.week) { week.hidden = true; return; }
+        var days = pt.week.map(function (w) {
+          var o = {}; for (var g in w.games) o[g] = w.games[g] * 1000;
+          return { date: w.date, games: o };
+        });
+        var today = {}, g;
+        for (g in (pt.today || {})) today[g] = todayMs(g, now);
+        for (g in (pt.active || {})) today[g] = todayMs(g, now);
+        days.push({ date: pt.date, games: today, now: true });
+        var totals = {}, all = 0, max = 0;
+        days.forEach(function (d) {
+          d.sum = 0;
+          for (var k in d.games) { totals[k] = (totals[k] || 0) + d.games[k]; d.sum += d.games[k]; }
+          all += d.sum; max = Math.max(max, d.sum);
+        });
+        if (all < 60000) { week.hidden = true; return; }
+        var top = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; }).slice(0, 3);
+        function color(name) { var i = top.indexOf(name); return i < 0 ? OTHER : SEG[i]; }
+
+        weekTotal.textContent = dur(all);
+        weekBars.textContent = '';
+        days.forEach(function (d) {
+          var col = document.createElement('div'), bar = document.createElement('div'), lab = document.createElement('span');
+          col.className = 'wcol'; bar.className = 'wbar'; lab.className = 'wday' + (d.now ? ' now' : '');
+          lab.textContent = d.now ? 'today' : WD[new Date(d.date + 'T12:00:00').getDay()];
+          var names = Object.keys(d.games).sort(function (a, b) { return d.games[b] - d.games[a]; });
+          names.forEach(function (n) {
+            var seg = document.createElement('i');
+            seg.style.height = Math.max(d.games[n] > 0 ? 2 : 0, Math.round(d.games[n] / max * 44)) + 'px';
+            seg.style.background = color(n);
+            bar.appendChild(seg);
+          });
+          col.title = lab.textContent + (names.length ? ' · ' + names.map(function (n) { return n + ' ' + dur(d.games[n]); }).join(', ') : ' · nothing');
+          col.appendChild(bar); col.appendChild(lab); weekBars.appendChild(col);
+        });
+        weekLegend.textContent = '';
+        top.forEach(function (n) {
+          var s = document.createElement('span'), dot = document.createElement('b');
+          dot.style.background = color(n); s.appendChild(dot);
+          s.appendChild(document.createTextNode(n + ' ' + dur(totals[n])));
+          weekLegend.appendChild(s);
+        });
+        week.hidden = false;
+      }
+      var weekAt = 0;
 
       function render(d) {
         cur = d;
@@ -633,6 +703,7 @@
         idleBase = st === 'offline' ? 'offline right now. probably asleep.' : 'not doing anything right now.';
         idle.textContent = idleBase;
         box.hidden = false;
+        weekAt = 0;  // new data: redraw the week chart on this update
         update();
       }
 
@@ -641,6 +712,7 @@
         var now = Date.now(), acts = cur.activities || [];
         var game = find(acts, function (x) { return x.type !== 4 && x.name !== 'Spotify'; });
         var pt = cur.playtime;
+        if (now - weekAt > 30000) { weekAt = now; renderWeek(now); }  // today's bar grows live, twice a minute
         if (game) {
           var parts = [], act0 = pt && pt.active && pt.active[game.name];
           var start = (game.timestamps && game.timestamps.start) || (act0 && act0.start);
