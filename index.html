@@ -53,9 +53,10 @@
       padding: 24px 16px 104px;
       overflow-x: hidden;
     }
-    #aurora, #bg, #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-    #aurora { z-index: 0; filter: blur(18px); opacity: .3; }
-    #bg { z-index: 0; }
+    #aurora, #bg, #rain, #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+    #aurora { z-index: 0; filter: blur(18px); opacity: .3; transition: opacity 4s ease; }
+    #bg { z-index: 0; transition: opacity 4s ease; }
+    #rain { z-index: 0; }
     #fx { z-index: 55; }
 
     /* click-to-enter gate */
@@ -198,6 +199,17 @@
 
     .egg { margin-top: 16px; font-size: 11px; color: var(--faint); min-height: 1.4em; }
 
+    /* small confirmation bubble ("discord username copied") */
+    #toast {
+      position: fixed; left: 50%; bottom: 84px; z-index: 6;
+      transform: translate(-50%, 8px); opacity: 0; pointer-events: none;
+      padding: 8px 14px; border-radius: 12px; font-size: 12px; color: var(--text);
+      background: var(--card); border: 1px solid var(--line); backdrop-filter: blur(10px);
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    #toast b { color: var(--accent); font-weight: 600; }
+
     /* music player */
     #player {
       position: fixed; right: 16px; bottom: 16px; z-index: 4;
@@ -261,6 +273,7 @@
 <body>
   <canvas id="aurora"></canvas>
   <canvas id="bg"></canvas>
+  <canvas id="rain"></canvas>
   <canvas id="fx"></canvas>
   <div id="cdot"></div><div id="cring"></div>
   <div id="gate" role="button" tabindex="0" aria-label="Enter"><span class="blink">click to enter</span></div>
@@ -278,6 +291,8 @@
       <div class="meta">
         <span>📍 Finland</span>
         <span id="clock">--:--</span>
+        <span id="wx" hidden></span>
+        <span id="views" hidden></span>
         <span class="st" id="statusText" hidden></span>
       </div>
 
@@ -311,7 +326,7 @@
       </section>
 
       <nav class="icons">
-        <a href="https://discord.com/users/1015157576687698030" target="_blank" rel="noopener" aria-label="Discord" title="Discord">
+        <a id="dcLink" href="https://discord.com/users/1015157576687698030" target="_blank" rel="noopener" aria-label="Copy Discord username" title="copy discord username">
           <svg viewBox="0 0 24 24"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.6 1.3a18.3 18.3 0 0 0-5.5 0L8.6 3a19.7 19.7 0 0 0-4.9 1.5C.6 9.1-.3 13.6.1 18.1a19.9 19.9 0 0 0 6 3l1.3-2a12.8 12.8 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 12.2 0l.5.4a12.9 12.9 0 0 1-2 1l1.3 2a19.8 19.8 0 0 0 6-3c.5-5.2-.9-9.7-3.6-13.7ZM8 15.4c-1.2 0-2.2-1.1-2.2-2.4S6.8 10.6 8 10.6s2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg>
         </a>
         <a href="https://github.com/Tihvert" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">
@@ -325,6 +340,8 @@
       <p class="egg" id="egg"></p>
     </main>
   </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
 
   <div id="player" class="paused" role="region" aria-label="Music player">
     <button id="pp" type="button" aria-label="Play music"></button>
@@ -358,7 +375,7 @@
     var gate = $('gate'), stage = $('stage'), card = $('card');
     function enter() {
       if (gate.classList.contains('gone')) return;
-      gate.classList.add('gone'); stage.classList.add('in'); startTyping(); Music.start();
+      gate.classList.add('gone'); stage.classList.add('in'); startTyping(); Music.start(); Views.hit();
     }
     gate.addEventListener('click', enter);
     gate.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') enter(); });
@@ -763,6 +780,7 @@
 
       return {
         render: render,
+        username: function () { return cur && cur.discord_user && cur.discord_user.username; },
         start: function () {
           if (!STATUS_API || !window.fetch) return;
           fetch(STATUS_API + '/v1/presence')
@@ -774,6 +792,140 @@
       };
     })();
     Presence.start();
+
+    /* ---------- live sky: Helsinki's real weather and the real aurora forecast drive the background ----------
+       Open-Meteo (weather) and NOAA SWPC (planetary Kp index) both allow browser requests, no key.
+       Rain or snow falls when it does in Helsinki, clouds dim the stars, and the aurora glows
+       brighter when real geomagnetic activity is up. */
+    var Sky = (function () {
+      var label = $('wx'), auroraEl = $('aurora'), starsEl = $('bg'), rc = $('rain'), r = rc.getContext('2d');
+      var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2), flakes = [], fall = null, running = false, last = 0;
+      var weather = null, kp = null;
+      // WMO weather codes -> [day icon, night icon, words, precipitation kind, particle count]
+      function describe(code) {
+        if (code === 0) return ['☀️', '🌙', 'clear', null, 0];
+        if (code === 1) return ['🌤️', '🌙', 'mostly clear', null, 0];
+        if (code === 2) return ['⛅', '☁️', 'partly cloudy', null, 0];
+        if (code === 3) return ['☁️', '☁️', 'overcast', null, 0];
+        if (code === 45 || code === 48) return ['🌫️', '🌫️', 'fog', null, 0];
+        if (code >= 51 && code <= 57) return ['🌦️', '🌧️', 'drizzle', 'rain', 70];
+        if (code >= 61 && code <= 67) return ['🌧️', '🌧️', 'rain', 'rain', code >= 65 ? 220 : code >= 63 ? 160 : 110];
+        if (code >= 71 && code <= 77) return ['🌨️', '🌨️', 'snow', 'snow', code >= 75 ? 150 : code >= 73 ? 100 : 60];
+        if (code >= 80 && code <= 82) return ['🌦️', '🌧️', 'rain showers', 'rain', code >= 81 ? 180 : 110];
+        if (code === 85 || code === 86) return ['🌨️', '🌨️', 'snow showers', 'snow', code === 86 ? 140 : 80];
+        if (code >= 95) return ['⛈️', '⛈️', 'thunderstorm', 'rain', 200];
+        return ['☁️', '☁️', 'cloudy', null, 0];
+      }
+      function kpWords(k) { return k >= 5 ? 'storm, aurora likely' : k >= 4 ? 'active' : k >= 3 ? 'unsettled' : 'quiet'; }
+
+      function size() { W = innerWidth; H = innerHeight; rc.width = W * dpr; rc.height = H * dpr; }
+      function spawn(top) {
+        var snow = fall.kind === 'snow';
+        return { x: Math.random() * W, y: top ? -10 : Math.random() * H,
+                 v: snow ? 35 + Math.random() * 45 : 900 + Math.random() * 450,
+                 s: snow ? .8 + Math.random() * 1.8 : 9 + Math.random() * 9,
+                 ph: Math.random() * 6.3 };
+      }
+      function frame(now) {
+        if (!fall) { running = false; r.clearRect(0, 0, rc.width, rc.height); return; }
+        var dt = Math.min(.05, (now - last) / 1000); last = now;
+        r.setTransform(dpr, 0, 0, dpr, 0, 0); r.clearRect(0, 0, W, H);
+        var snow = fall.kind === 'snow';
+        r.strokeStyle = 'rgba(190, 205, 255, .28)'; r.fillStyle = 'rgba(255, 255, 255, .7)'; r.lineWidth = 1;
+        if (!snow) r.beginPath();
+        flakes.forEach(function (f, i) {
+          f.y += f.v * dt;
+          if (snow) { f.x += Math.sin(now / 900 + f.ph) * 18 * dt; r.beginPath(); r.arc(f.x, f.y, f.s, 0, 6.3); r.fill(); }
+          else { f.x -= f.v * .12 * dt; r.moveTo(f.x, f.y); r.lineTo(f.x + f.s * .12, f.y - f.s); }
+          if (f.y > H + 20 || f.x < -20) flakes[i] = spawn(true);
+        });
+        if (!snow) r.stroke();
+        requestAnimationFrame(frame);
+      }
+      function setFall(kind, count) {
+        if (reduce || !kind) { fall = null; flakes = []; return; }
+        fall = { kind: kind };
+        size(); flakes = [];
+        for (var i = 0; i < count; i++) flakes.push(spawn(false));
+        if (!running) { running = true; last = performance.now(); requestAnimationFrame(frame); }
+      }
+      addEventListener('resize', function () { if (fall) size(); });
+
+      function apply() {
+        var d = weather ? describe(weather.code) : null;
+        var cloudy = d && (d[3] || /overcast|fog|cloudy/.test(d[2]) && d[2] !== 'partly cloudy');
+        // the usual look stays at quiet Kp; the aurora only flares up when real activity rises.
+        // Clouds hide a little of it and some of the stars.
+        var base = kp === null || kp < 3 ? .3 : kp >= 5 ? .55 : kp >= 4 ? .44 : .36;
+        auroraEl.style.opacity = (base * (cloudy ? .85 : 1)).toFixed(2);
+        starsEl.style.opacity = cloudy ? '.55' : '1';
+        if (!d) return;
+        setFall(d[3], d[4]);
+        label.textContent = (weather.day ? d[0] : d[1]) + ' ' + Math.round(weather.temp) + '°' + (kp !== null && kp >= 5 ? ' · 🌌' : '');
+        label.title = 'Helsinki right now: ' + weather.temp.toFixed(1) + ' °C, ' + d[2] +
+                      (kp !== null ? ' · aurora activity Kp ' + kp.toFixed(1) + ' (' + kpWords(kp) + ')' : '');
+        label.hidden = false;
+      }
+      function load() {
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=60.17&longitude=24.94&current=temperature_2m,weather_code,is_day&timezone=Europe%2FHelsinki')
+          .then(function (res) { return res.json(); })
+          .then(function (j) { var c = j && j.current; if (c) { weather = { temp: c.temperature_2m, code: c.weather_code, day: c.is_day === 1 }; apply(); } })
+          .catch(function () {});
+        fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json')
+          .then(function (res) { return res.json(); })
+          .then(function (rows) { var x = rows && rows[rows.length - 1]; if (x && typeof x.estimated_kp === 'number') { kp = x.estimated_kp; apply(); } })
+          .catch(function () {});
+      }
+      if (window.fetch) { load(); setInterval(load, 15 * 60 * 1000); }
+      return { preview: function (code, k, temp) { weather = { temp: temp === undefined ? 1 : temp, code: code, day: false }; kp = k; apply(); } };
+    })();
+
+    /* ---------- view counter: one count per visitor per day, kept by the status bot ---------- */
+    var Views = (function () {
+      var el = $('views'), sent = false;
+      function short(n) {
+        return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'
+             : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : String(n);
+      }
+      function show(n) {
+        if (typeof n !== 'number') return;
+        el.textContent = '👁 ' + short(n); el.title = n.toLocaleString('en') + (n === 1 ? ' view' : ' views'); el.hidden = false;
+      }
+      return {
+        // sent when the visitor clicks "enter", so link-preview bots that never run the page don't count
+        hit: function () {
+          if (sent || !STATUS_API || !window.fetch) return;
+          sent = true;
+          fetch(STATUS_API + '/v1/views', { method: 'POST' })
+            .then(function (res) { return res.json(); })
+            .then(function (j) { show(j && j.views); })
+            .catch(function () {});
+        }
+      };
+    })();
+
+    /* ---------- discord button copies the username (profile links only work inside the Discord app) ---------- */
+    (function () {
+      var link = $('dcLink'), toast = $('toast'), hideTimer = 0;
+      function say(html) {
+        toast.innerHTML = html; toast.classList.add('show');
+        clearTimeout(hideTimer); hideTimer = setTimeout(function () { toast.classList.remove('show'); }, 1800);
+      }
+      function fallbackCopy(text) {
+        var t = document.createElement('textarea'); t.value = text; t.setAttribute('readonly', '');
+        t.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.appendChild(t); t.select();
+        var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(t); return ok;
+      }
+      link.addEventListener('click', function (e) {
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return;  // modifier-click still opens the profile
+        e.preventDefault();
+        var name = Presence.username() || 'tihvert';
+        var done = function () { say('copied discord username <b>' + name.replace(/[<>&]/g, '') + '</b>'); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(name).then(done, function () { if (fallbackCopy(name)) done(); });
+        else if (fallbackCopy(name)) done();
+      });
+    })();
 
     /* ---------- music: YouTube song or the original synthesized ambient loop ---------- */
     var Music = (function () {
