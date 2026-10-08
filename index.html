@@ -105,6 +105,8 @@
     }
     .avatar:hover { transform: rotate(-8deg) scale(1.04); box-shadow: 0 0 0 4px rgba(196, 181, 253, .25), 0 8px 30px rgba(0,0,0,.5); }
     .avatar.spin { animation: spin .8s ease; }
+    .avatar.poke { animation: poke .3s ease; }
+    @keyframes poke { 30% { transform: scale(.88) rotate(-10deg); } 65% { transform: scale(1.08) rotate(6deg); } }
     @keyframes spin { to { transform: rotate(720deg); } }
     .sdot {
       position: absolute; right: 2px; bottom: 4px;
@@ -185,7 +187,7 @@
     .wlegend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .wlegend span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .wlegend b { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
-    .wlegend img { width: 14px; height: 14px; border-radius: 4px; margin-right: 5px; vertical-align: middle; object-fit: cover; }
+    .wlegend img { width: 16px; height: 16px; border-radius: 4px; margin-right: 5px; vertical-align: middle; object-fit: cover; }
 
     .icons { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
     .icons a {
@@ -197,7 +199,10 @@
     .icons a:hover, .icons a:focus-visible { transform: translateY(-3px); border-color: var(--accent); color: var(--accent); box-shadow: 0 6px 20px rgba(167, 139, 250, .18); outline: none; }
     .icons svg { width: 20px; height: 20px; fill: currentColor; }
 
-    .egg { margin-top: 16px; font-size: 11px; color: var(--faint); min-height: 1.4em; }
+    .egg { margin-top: 10px; min-height: 1.9em; font-size: 13px; font-weight: 600; color: var(--accent); }
+    .egg:not(:empty) { display: inline-block; padding: 4px 12px; border-radius: 12px; background: rgba(196, 181, 253, .12);
+                       border: 1px solid rgba(196, 181, 253, .35); animation: eggpop .25s ease; }
+    @keyframes eggpop { from { transform: scale(.6); opacity: 0; } 70% { transform: scale(1.1); } }
 
     /* small confirmation bubble ("discord username copied") */
     #toast {
@@ -241,14 +246,18 @@
     /* music player */
     #player {
       position: fixed; right: 16px; bottom: 16px; z-index: 4;
-      width: 310px; max-width: calc(100% - 32px);
-      display: none; align-items: center; gap: 10px;
+      width: 300px; max-width: calc(100% - 32px);
+      display: none; flex-direction: column; gap: 8px;
       padding: 10px 12px;
       font-size: 11px; color: var(--muted);
       background: var(--card); border: 1px solid var(--line); border-radius: 16px;
       backdrop-filter: blur(14px);
     }
     #player.show { display: flex; }
+    .pl-top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .pl-ctrl { display: flex; align-items: center; gap: 6px; }
+    .pl-vol { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .pl-vol svg { width: 14px; height: 14px; fill: currentColor; }
     #pp {
       width: 34px; height: 34px; flex: none; border-radius: 50%;
       display: grid; place-items: center; cursor: pointer;
@@ -256,9 +265,9 @@
     }
     #pp:hover, #pp:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }
     #pp svg { width: 14px; height: 14px; fill: currentColor; }
-    .pl-art { width: 34px; height: 34px; flex: none; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); }
+    .pl-art { width: 40px; height: 40px; flex: none; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); }
     .pl-info { flex: 1; min-width: 0; }
-    .pl-title { display: flex; align-items: center; gap: 8px; color: var(--text); }
+    .pl-title { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 12px; }
     /* song name: ellipsis by default, scrolls in a seamless loop when it does not fit */
     .pl-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     .pl-name.scroll {
@@ -275,7 +284,14 @@
     .eq i:nth-child(2) { animation-delay: .2s; } .eq i:nth-child(3) { animation-delay: .4s; }
     @keyframes eq { 0%,100% { height: 3px; } 50% { height: 11px; } }
     #player.paused .eq i { animation: none; height: 3px; opacity: .5; }
-    .pl-bar { height: 3px; margin-top: 6px; border-radius: 3px; overflow: hidden; background: rgba(255, 255, 255, .08); }
+    .pl-bar { height: 4px; margin-top: 0; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, .08); cursor: pointer; position: relative; }
+    .pl-bar::before { content: ""; position: absolute; inset: -6px 0; }  /* bigger hit area for seeking */
+    .pl-bar:hover { height: 6px; margin-block: -1px; }
+    .pl-skip { width: 26px; height: 26px; flex: none; display: grid; place-items: center; padding: 0; cursor: pointer;
+               color: var(--muted); background: none; border: 0; border-radius: 50%; }
+    .pl-skip:hover, .pl-skip:focus-visible { color: var(--accent); outline: none; }
+    .pl-skip svg { width: 13px; height: 13px; fill: currentColor; }
+    #player:not(.yt) .pl-skip { display: none; }
     .pl-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--aur2), var(--aur1)); }
     .pl-bar.live i { width: 30%; animation: livebar 2.6s ease-in-out infinite alternate; }
     #player.paused .pl-bar.live i { animation-play-state: paused; }
@@ -293,7 +309,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .stage.in { animation: none; opacity: 1; transform: none; }
-      .avatar.spin, h1, .eq i, .pl-bar.live i { animation: none; }
+      .avatar.spin, .avatar.poke, h1, .eq i, .pl-bar.live i { animation: none; }
       .eq i { height: 6px; }
     }
   </style>
@@ -379,13 +395,19 @@
   </div>
 
   <div id="player" class="paused" role="region" aria-label="Music player">
-    <button id="pp" type="button" aria-label="Play music"></button>
-    <img class="pl-art" id="plArt" alt="" hidden>
-    <div class="pl-info">
-      <div class="pl-title"><span class="eq"><i></i><i></i><i></i></span><span class="pl-name" id="plName"><span class="pl-track" id="plTitle">…</span></span></div>
-      <div class="pl-bar" id="plBar"><i id="plProg"></i></div>
+    <div class="pl-top">
+      <img class="pl-art" id="plArt" alt="" hidden>
+      <div class="pl-info">
+        <div class="pl-title"><span class="eq"><i></i><i></i><i></i></span><span class="pl-name" id="plName"><span class="pl-track" id="plTitle">…</span></span></div>
+      </div>
     </div>
-    <input id="vol" type="range" min="0" max="100" value="35" aria-label="Volume">
+    <div class="pl-bar" id="plBar"><i id="plProg"></i></div>
+    <div class="pl-ctrl">
+      <button id="prevBtn" class="pl-skip" type="button" aria-label="Previous song" title="previous"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zm3.5 7L19 5v14z"/></svg></button>
+      <button id="pp" type="button" aria-label="Play music"></button>
+      <button id="nextBtn" class="pl-skip" type="button" aria-label="Next song" title="next"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM5 5l9.5 7L5 19z"/></svg></button>
+      <span class="pl-vol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg><input id="vol" type="range" min="0" max="100" value="35" aria-label="Volume"></span>
+    </div>
   </div>
 
   <script>
@@ -397,15 +419,15 @@
     // Optional song name shown in the player; empty = the YouTube video title.
     var MUSIC_TITLE = "Travis Scott — STARGAZING";
     // ASTROWORLD cover, linked from Spotify's own image CDN (official art, not re-hosted here)
-    var MUSIC_COVER = "https://i.scdn.co/image/ab67616d00001e02daec894c14c0ca42d76eeb32";
+    var MUSIC_COVER = "https://i.scdn.co/image/ab67616d0000b273daec894c14c0ca42d76eeb32";
     // after STARGAZING the player goes through these, then starts over (official, embeddable uploads;
     // covers linked from Apple's image CDN, nothing re-hosted)
     var MUSIC_PLAYLIST = [
       { id: MUSIC_YOUTUBE_ID, title: MUSIC_TITLE, cover: MUSIC_COVER },
       { id: "BAdLRRbzOv4", title: "Bag Raiders — Shooting Stars",
-        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/02/0a/04/020a04be-9707-9269-95e9-9822feee23a0/10UMGIM23712.rgb.jpg/300x300bb.jpg" },
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/02/0a/04/020a04be-9707-9269-95e9-9822feee23a0/10UMGIM23712.rgb.jpg/600x600bb.jpg" },
       { id: "pildU9lK6vM", title: "Travis Scott — MY EYES",
-        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/7d/4f/94/7d4f9468-56e1-3a2d-7186-c8088170ef58/196871341899.jpg/300x300bb.jpg" }
+        cover: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/7d/4f/94/7d4f9468-56e1-3a2d-7186-c8088170ef58/196871341899.jpg/600x600bb.jpg" }
     ];
     // Live Discord status from our own bot "Lassin Passi" (runs on the relay, sits in Riksun S-Market).
     var STATUS_API = "https://status.tihvert.xyz";
@@ -457,6 +479,7 @@
     av.addEventListener('click', function () {
       clicks++;
       egg.textContent = msgs[Math.min(clicks, msgs.length - 1)];
+      if (clicks < 5) { av.classList.remove('poke'); void av.offsetWidth; av.classList.add('poke'); }  // every click reacts right away
       if (clicks >= 5) { av.classList.remove('spin'); void av.offsetWidth; av.classList.add('spin'); clicks = 0; setTimeout(function () { egg.textContent = ''; }, 1500); }
     });
     av.addEventListener('error', function () { if (av.getAttribute('src') !== 'avatar.png') av.src = 'avatar.png'; });
@@ -676,11 +699,27 @@
         return a ? ms + Math.max(0, now - a.since) : ms;
       }
       function find(list, test) { for (var i = 0; i < list.length; i++) if (test(list[i])) return list[i]; return null; }
+      // What the card shows: a game Discord sees first; otherwise what the PC tracker reports as open,
+      // in Tihvert's order: a game, then coding (VS Code / Roblox Studio...), then Spotify.
+      var PC_RANK = { game: 0, code: 1, music: 2 }, PC_KIND = { game: 'playing', code: 'coding in', music: 'listening to' };
+      function mainActivity(d, discordSpotify) {
+        var g = find(d.activities || [], function (x) { return x.type !== 4 && x.name !== 'Spotify'; });
+        if (g) return g;
+        var pt = d.playtime || {}, cats = pt.cats || {}, best = null;
+        Object.keys(pt.active || {}).forEach(function (n) {
+          var c = cats[n] || 'game';
+          if (c === 'music' && discordSpotify) return;  // Discord's own Spotify card already shows the song
+          if (!best || PC_RANK[c] < PC_RANK[best.cat]) best = { name: n, cat: c, pc: true };
+        });
+        return best;
+      }
 
       // "played this week": the calendar week mo..su. Past days come from the bot's history (it keeps
       // the six days before today, which always covers back to monday), today is live (todayMs).
       var week = $('week'), weekBars = $('weekBars'), weekTotal = $('weekTotal'), weekLegend = $('weekLegend');
       var SEG = ['var(--accent)', 'var(--aur1)', 'var(--aur3)'], OTHER = 'var(--faint)';
+      var BRAND = { 'Spotify': '#1DB954', 'Rainbow Six Siege': '#c4b5fd', 'Roblox': '#e2e8f0', 'Roblox Studio': '#00A2FF',
+                    'VS Code': '#3FA7F5', 'Visual Studio': '#A57BE0', 'Minecraft': '#6ee7b7' };
       var WD = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
       // logos for apps Discord has no icon for (the PC tracker reports them); emoji when there is none
       var APP_ICONS = { 'Spotify': 'https://cdn.simpleicons.org/spotify/1DB954', 'Roblox': 'https://cdn.simpleicons.org/roblox/ffffff',
@@ -713,7 +752,10 @@
         });
         if (all < 60000) { week.hidden = true; return; }
         var top = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; }).slice(0, 3);
-        function color(name) { var i = top.indexOf(name); return i < 0 ? OTHER : SEG[i]; }
+        var used = {}, palette = SEG.slice(), colors = {};
+        top.forEach(function (n) { if (BRAND[n]) { colors[n] = BRAND[n]; used[BRAND[n]] = 1; } });
+        top.forEach(function (n) { if (!colors[n]) colors[n] = palette.filter(function (c) { return !used[c]; })[0] || OTHER, used[colors[n]] = 1; });
+        function color(name) { return colors[name] || OTHER; }
 
         weekTotal.textContent = dur(all);
         weekBars.textContent = '';
@@ -775,18 +817,19 @@
           if (custom.state) { var sp = document.createElement('span'); sp.textContent = custom.state; cst.appendChild(sp); }
         }
 
-        var game = find(acts, function (x) { return x.type !== 4 && x.name !== 'Spotify'; });
+        var sp2 = d.listening_to_spotify && d.spotify;
+        var game = mainActivity(d, !!sp2);
         act.hidden = !game;
         if (game) {
-          actKind.textContent = KIND[game.type] || 'playing';
+          actKind.textContent = game.pc ? PC_KIND[game.cat] : (KIND[game.type] || 'playing');
           actName.textContent = game.name || '';
           actSub.textContent = [game.details, game.state].filter(Boolean).join(' · ');
-          var src = asset(game.assets && game.assets.large_image, game.application_id);
+          var src = game.pc ? ((d.playtime.icons || {})[game.name] || APP_ICONS[game.name] || '')
+                            : asset(game.assets && game.assets.large_image, game.application_id);
           actImg.hidden = !src; actIcon.hidden = !!src;
           if (src && actImg.getAttribute('src') !== src) actImg.src = src;
         }
 
-        var sp2 = d.listening_to_spotify && d.spotify;
         spot.hidden = !sp2;
         if (sp2) {
           spotSong.textContent = sp2.song || '';
@@ -805,7 +848,7 @@
       function update() {
         if (!cur) return;
         var now = Date.now(), acts = cur.activities || [];
-        var game = find(acts, function (x) { return x.type !== 4 && x.name !== 'Spotify'; });
+        var game = mainActivity(cur, !!(cur.listening_to_spotify && cur.spotify));
         var pt = cur.playtime;
         if (now - weekAt > 30000) { weekAt = now; renderWeek(now); }  // today's bar grows live, twice a minute
         if (game) {
@@ -1023,6 +1066,7 @@
           print('⛏  Riksun S-Market  minecraft server for the boys (private)');
           print('🛂 Lassin Passi     discord bot with a bad attitude');
           print('🌌 tihvert.xyz      you are here');
+          print('💀 Ripehook         old project · discontinued', 'm');
         },
         discord: function () {
           var name = Presence.username() || 'tihvert';
@@ -1178,6 +1222,23 @@
         ui(); remember();
       }
       pp.addEventListener('click', function () { if (mode) playing ? pause() : play(); });
+      // Spotify-style controls (YouTube songs only): skip back / forward, click or drag the bar to seek
+      $('nextBtn').addEventListener('click', function () { if (mode === 'yt' && ytp) { nextTrack(); if (!playing) play(); } });
+      $('prevBtn').addEventListener('click', function () {
+        if (mode !== 'yt' || !ytp) return;
+        if (ytp.getCurrentTime() > 3) ytp.seekTo(0, true);  // like Spotify: first press restarts the song
+        else { track = (track - 2 + MUSIC_PLAYLIST.length) % MUSIC_PLAYLIST.length; nextTrack(); }
+        if (!playing) play();
+      });
+      function seekTo(e) {
+        if (mode !== 'yt' || !ytp || !ytp.getDuration) return;
+        var r = bar.getBoundingClientRect(), f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+        ytp.seekTo(f * ytp.getDuration(), true); prog.style.width = f * 100 + '%';
+      }
+      var dragging = false;
+      bar.addEventListener('pointerdown', function (e) { dragging = true; bar.setPointerCapture(e.pointerId); seekTo(e); });
+      bar.addEventListener('pointermove', function (e) { if (dragging) seekTo(e); });
+      bar.addEventListener('pointerup', function () { dragging = false; });
       vol.addEventListener('input', function () {
         v = +vol.value;
         try { localStorage.setItem('tihvert-vol', String(v)); } catch (e) {}
@@ -1208,7 +1269,7 @@
         showTrack(MUSIC_PLAYLIST[track]); ytp.loadVideoById(MUSIC_PLAYLIST[track].id);
       }
       function beginYouTube() {
-        mode = 'yt';
+        mode = 'yt'; player.classList.add('yt');
         bar.classList.remove('live'); player.classList.add('show');
         showTrack(MUSIC_PLAYLIST[0]);
         if (priming) { priming = false; ytp.seekTo(0, true); }  // clicked mid-prime: restart from the top
