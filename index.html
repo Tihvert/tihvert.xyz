@@ -180,6 +180,7 @@
     .wbar i { display: block; width: 100%; flex: none; transition: height .6s ease; }
     .wday { font-size: 9px; color: var(--faint); }
     .wday.now { color: var(--accent); }
+    .wcol.future { opacity: .4; }
     .wlegend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .wlegend span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .wlegend b { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
@@ -215,6 +216,7 @@
     }
     #pp:hover, #pp:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }
     #pp svg { width: 14px; height: 14px; fill: currentColor; }
+    .pl-art { width: 34px; height: 34px; flex: none; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); }
     .pl-info { flex: 1; min-width: 0; }
     .pl-title { display: flex; align-items: center; gap: 8px; color: var(--text); }
     /* song name: ellipsis by default, scrolls in a seamless loop when it does not fit */
@@ -326,6 +328,7 @@
 
   <div id="player" class="paused" role="region" aria-label="Music player">
     <button id="pp" type="button" aria-label="Play music"></button>
+    <img class="pl-art" id="plArt" alt="" hidden>
     <div class="pl-info">
       <div class="pl-title"><span class="eq"><i></i><i></i><i></i></span><span class="pl-name" id="plName"><span class="pl-track" id="plTitle">…</span></span></div>
       <div class="pl-bar" id="plBar"><i id="plProg"></i></div>
@@ -341,6 +344,8 @@
     var MUSIC_YOUTUBE_ID = "2a8PgqWrc_4"; // Travis Scott - STARGAZING (Audio), official TravisScottVEVO upload
     // Optional song name shown in the player; empty = the YouTube video title.
     var MUSIC_TITLE = "Travis Scott — STARGAZING";
+    // ASTROWORLD cover, linked from Spotify's own image CDN (official art, not re-hosted here)
+    var MUSIC_COVER = "https://i.scdn.co/image/ab67616d00001e02daec894c14c0ca42d76eeb32";
     // Live Discord status from our own bot "Lassin Passi" (runs on the relay, sits in Riksun S-Market).
     var STATUS_API = "https://status.tihvert.xyz";
 
@@ -602,21 +607,30 @@
       }
       function find(list, test) { for (var i = 0; i < list.length; i++) if (test(list[i])) return list[i]; return null; }
 
-      // "played this week": the six previous days come from the bot's history, today is live (todayMs)
+      // "played this week": the calendar week mo..su. Past days come from the bot's history (it keeps
+      // the six days before today, which always covers back to monday), today is live (todayMs).
       var week = $('week'), weekBars = $('weekBars'), weekTotal = $('weekTotal'), weekLegend = $('weekLegend');
       var SEG = ['var(--accent)', 'var(--aur1)', 'var(--aur3)'], OTHER = 'var(--faint)';
-      var WD = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];
+      var WD = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
+      function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
       function renderWeek(now) {
         var pt = cur && cur.playtime;
-        if (!pt || !pt.week) { week.hidden = true; return; }
-        var days = pt.week.map(function (w) {
+        if (!pt || !pt.week || !pt.date) { week.hidden = true; return; }
+        var past = {};
+        pt.week.forEach(function (w) {
           var o = {}; for (var g in w.games) o[g] = w.games[g] * 1000;
-          return { date: w.date, games: o };
+          past[w.date] = o;
         });
         var today = {}, g;
         for (g in (pt.today || {})) today[g] = todayMs(g, now);
         for (g in (pt.active || {})) today[g] = todayMs(g, now);
-        days.push({ date: pt.date, games: today, now: true });
+        var base = new Date(pt.date + 'T12:00:00'), wd = (base.getDay() + 6) % 7, days = [];
+        for (var i = 0; i < 7; i++) {
+          var d = new Date(base); d.setDate(base.getDate() - wd + i);
+          days.push(i < wd ? { label: WD[i], games: past[iso(d)] || {} }
+                  : i === wd ? { label: 'today', games: today, now: true }
+                  : { label: WD[i], games: {}, future: true });
+        }
         var totals = {}, all = 0, max = 0;
         days.forEach(function (d) {
           d.sum = 0;
@@ -631,8 +645,8 @@
         weekBars.textContent = '';
         days.forEach(function (d) {
           var col = document.createElement('div'), bar = document.createElement('div'), lab = document.createElement('span');
-          col.className = 'wcol'; bar.className = 'wbar'; lab.className = 'wday' + (d.now ? ' now' : '');
-          lab.textContent = d.now ? 'today' : WD[new Date(d.date + 'T12:00:00').getDay()];
+          col.className = 'wcol' + (d.future ? ' future' : ''); bar.className = 'wbar'; lab.className = 'wday' + (d.now ? ' now' : '');
+          lab.textContent = d.label;
           var names = Object.keys(d.games).sort(function (a, b) { return d.games[b] - d.games[a]; });
           names.forEach(function (n) {
             var seg = document.createElement('i');
@@ -891,6 +905,7 @@
         mode = 'yt';
         bar.classList.remove('live'); player.classList.add('show');
         setTitle(MUSIC_TITLE || 'loading…');
+        if (MUSIC_COVER) { var art = $('plArt'); art.src = MUSIC_COVER; art.hidden = false; }
         if (priming) { priming = false; ytp.seekTo(0, true); }  // clicked mid-prime: restart from the top
         wasMuted() ? pause() : play();
       }
