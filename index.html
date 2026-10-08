@@ -505,8 +505,9 @@
         gx = (e.clientX - r.left) / r.width * 100; gy = (e.clientY - r.top) / r.height * 100;
       });
       (function loop() {
-        cx += (tx - cx) * .08; cy += (ty - cy) * .08;
-        card.style.transform = 'perspective(900px) rotateY(' + (cx * 14).toFixed(2) + 'deg) rotateX(' + (-cy * 14).toFixed(2) + 'deg)';
+        cx += (tx - cx) * .09; cy += (ty - cy) * .09;
+        // up to ±20° at the window edges, short perspective for a deep swing
+        card.style.transform = 'perspective(700px) rotateY(' + (cx * 40).toFixed(2) + 'deg) rotateX(' + (-cy * 40).toFixed(2) + 'deg) scale(1.02)';
         card.style.setProperty('--gx', gx.toFixed(1) + '%'); card.style.setProperty('--gy', gy.toFixed(1) + '%');
         requestAnimationFrame(loop);
       })();
@@ -808,13 +809,15 @@
           if (vd && vd.title) { setTitle(vd.title); titleSet = true; }
         }
       }, 500);
-      // The YouTube player is preloaded (silent, no autoplay) while the gate is still showing,
-      // so the song starts the moment the visitor clicks "enter" instead of loading only then.
-      var entered = false, ytReady = false, ytFailed = false;
+      // The YouTube player is preloaded while the gate is still showing, and "primed": it starts
+      // muted (browsers allow muted autoplay), and the moment audio is flowing it is paused back at
+      // 0:00. The opening seconds are then already buffered, so "enter" starts the song instantly.
+      var entered = false, ytReady = false, ytFailed = false, priming = false;
       function beginYouTube() {
         mode = 'yt';
         bar.classList.remove('live'); player.classList.add('show');
         setTitle(MUSIC_TITLE || 'loading…');
+        if (priming) { priming = false; ytp.seekTo(0, true); }  // clicked mid-prime: restart from the top
         wasMuted() ? pause() : play();
       }
       function preloadYouTube(id) {
@@ -826,7 +829,14 @@
             videoId: id, width: 1, height: 1,
             playerVars: { autoplay: 0, loop: 1, playlist: id, controls: 0, playsinline: 1 },
             events: {
-              onReady: function (e) { ytp = e.target; ytReady = true; if (entered && !mode) beginYouTube(); },
+              onReady: function (e) {
+                ytp = e.target; ytReady = true;
+                if (entered && !mode) beginYouTube();
+                else if (!entered) { priming = true; ytp.mute(); ytp.playVideo(); }
+              },
+              onStateChange: function (e) {
+                if (priming && e.data === YT.PlayerState.PLAYING) { priming = false; ytp.pauseVideo(); ytp.seekTo(0, true); }
+              },
               // embedding blocked / video gone: fall back to the built-in ambient loop
               onError: function () { ytFailed = true; if (entered && mode !== 'synth') { mode = null; startSynth(); } }
             }
