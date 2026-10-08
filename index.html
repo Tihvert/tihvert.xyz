@@ -210,6 +210,34 @@
     #toast.show { opacity: 1; transform: translate(-50%, 0); }
     #toast b { color: var(--accent); font-weight: 600; }
 
+    /* hidden terminal: ~ / ` / § key or the faint >_ button */
+    #termBtn {
+      position: fixed; left: 16px; bottom: 16px; z-index: 4;
+      font: 600 11px 'JetBrains Mono', ui-monospace, monospace; color: var(--faint);
+      background: none; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; cursor: pointer;
+    }
+    #termBtn:hover, #termBtn:focus-visible { color: var(--accent); border-color: var(--line); outline: none; }
+    @media (max-width: 480px) { #termBtn { bottom: 78px; } }  /* the player spans the bottom on phones */
+    #term {
+      position: fixed; left: 50%; top: 50%; z-index: 7; transform: translate(-50%, -50%);
+      width: min(640px, calc(100% - 32px)); height: min(420px, calc(100% - 120px));
+      display: flex; flex-direction: column;
+      background: rgba(5, 5, 9, .92); border: 1px solid var(--line); border-radius: 14px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .6), 0 0 0 1px rgba(196, 181, 253, .08);
+      backdrop-filter: blur(16px); font: 12px/1.55 'JetBrains Mono', ui-monospace, monospace; color: var(--text);
+    }
+    #term[hidden] { display: none; }
+    .t-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .t-bar button { background: none; border: 0; color: var(--muted); font-size: 16px; cursor: pointer; line-height: 1; }
+    .t-bar button:hover { color: var(--accent); }
+    .t-out { flex: 1; overflow: auto; padding: 10px 12px; white-space: pre-wrap; word-break: break-word; min-height: 0; }
+    .t-out .c { color: var(--accent); }
+    .t-out .m { color: var(--muted); }
+    .t-out .g { color: var(--aur1); }
+    .t-in { display: flex; gap: 8px; padding: 8px 12px 12px; align-items: center; }
+    .t-ps { color: var(--aur1); flex: none; }
+    .t-in input { flex: 1; min-width: 0; background: none; border: 0; outline: none; color: var(--text); font: inherit; caret-color: var(--accent); }
+
     /* music player */
     #player {
       position: fixed; right: 16px; bottom: 16px; z-index: 4;
@@ -342,6 +370,13 @@
   </div>
 
   <div id="toast" role="status" aria-live="polite"></div>
+
+  <button id="termBtn" type="button" aria-label="Open terminal" title="terminal (~)">&gt;_</button>
+  <div id="term" hidden role="dialog" aria-label="Terminal">
+    <div class="t-bar"><span>tihvert@xyz: ~</span><button type="button" id="termX" aria-label="Close terminal">×</button></div>
+    <div class="t-out" id="termOut"></div>
+    <label class="t-in"><span class="t-ps">tihvert@xyz:~$</span><input id="termIn" autocomplete="off" spellcheck="false" aria-label="Command"></label>
+  </div>
 
   <div id="player" class="paused" role="region" aria-label="Music player">
     <button id="pp" type="button" aria-label="Play music"></button>
@@ -924,6 +959,90 @@
         var done = function () { say('copied discord username <b>' + name.replace(/[<>&]/g, '') + '</b>'); };
         if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(name).then(done, function () { if (fallbackCopy(name)) done(); });
         else if (fallbackCopy(name)) done();
+      });
+    })();
+
+    /* ---------- hidden terminal (~ / ` / § or the >_ button) ---------- */
+    (function () {
+      var term = $('term'), out = $('termOut'), input = $('termIn'), hist = [], hi = 0, opened = false;
+      function print(text, cls) {
+        var d = document.createElement('div');
+        if (cls) d.className = cls;
+        d.textContent = text; out.appendChild(d); out.scrollTop = out.scrollHeight;
+      }
+      function copy(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return false; });
+        return Promise.resolve(false);
+      }
+      var LOGO = [
+        '   .-"""-.    ', '  /  .-.  \\   ', ' |  ( ☄ )  |  ', '  \\  `-\'  /   ', '   `-...-\'    '];
+      var CMDS = {
+        help: function () {
+          print('commands:', 'c');
+          print('  whoami     who is this guy\n  neofetch   the machine\n  projects   what i build\n  discord    copy my discord username\n  weather    helsinki right now\n  music      play / pause the song\n  views      how many have been here\n  clear      clean the screen\n  exit       close the terminal');
+          print('  (there are a few more. good luck.)', 'm');
+        },
+        whoami: function () {
+          print('tihvert', 'c');
+          print('finland · builds roblox games, discord bots and websites.\nruns a minecraft server off a laptop for the boys.\nawake at hours that should not exist.');
+        },
+        neofetch: function () {
+          var info = ['tihvert@xyz', '-----------', 'OS:      Windows 11 Pro', 'CPU:     AMD Ryzen 5 3600 (6c/12t)', 'GPU:     NVIDIA GeForce RTX 2070',
+                      'RAM:     32 GB', 'Board:   MSI B450M MORTAR MAX', 'Display: 5120x1440 + 1440x2560 (vertical)', 'Server:  Dell Latitude 7430 · Ubuntu 26.04'];
+          for (var i = 0; i < info.length; i++) print((LOGO[i] || '              ') + '  ' + info[i], i === 0 ? 'c' : '');
+        },
+        projects: function () {
+          print('☄  CATCH A METEOR   roblox game · coming soon', 'g');
+          print('⛏  Riksun S-Market  minecraft server for the boys (private)');
+          print('🛂 Lassin Passi     discord bot with a bad attitude');
+          print('🌌 tihvert.xyz      you are here');
+        },
+        discord: function () {
+          var name = Presence.username() || 'tihvert';
+          copy(name).then(function (ok) { print(ok ? 'copied: ' + name : 'discord: ' + name, 'g'); });
+        },
+        weather: function () { var w = $('wx'); print(w.hidden ? 'no weather data yet.' : w.title); },
+        music: function () { $('pp').click(); print('toggled.', 'm'); },
+        views: function () { var v = $('views'); print(v.hidden ? 'counter not loaded yet.' : v.title); },
+        clear: function () { out.textContent = ''; },
+        exit: function () { close(); },
+        ls: function () { print('bio.txt  projects/  secrets/  definitely_not_homework.docx'); },
+        'cat bio.txt': function () { CMDS.whoami(); },
+        'cd secrets': function () { print('permission denied. nice try.', 'm'); },
+        'ls secrets': function () { CMDS['cd secrets'](); },
+        sudo: function () { print('tihvert is not in the sudoers file. this incident will be reported.', 'm'); },
+        'rm -rf /': function () { print('deleting everything...', 'c'); setTimeout(function () { print('just kidding. go outside.', 'm'); }, 900); },
+        lassi: function () { print('🛂 Hakemus hylätty.', 'c'); },
+        meteor: function () { print('☄  something is falling. soon.', 'g'); },
+        sleep: function () { print('no.', 'm'); },
+        date: function () { print(new Date().toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki' }) + ' (Helsinki)'); }
+      };
+      function run(raw) {
+        var cmd = raw.trim().replace(/\s+/g, ' ');
+        print('tihvert@xyz:~$ ' + raw, 'm');
+        if (!cmd) return;
+        hist.push(raw); hi = hist.length;
+        var key = cmd.toLowerCase(), fn = CMDS[key] || CMDS[key.split(' ')[0]];
+        if (key.indexOf('sudo ') === 0) fn = CMDS.sudo;
+        if (fn) fn(); else print(cmd.split(' ')[0] + ': command not found. try help', 'm');
+      }
+      function open() {
+        term.hidden = false;
+        if (!opened) { opened = true; print('welcome. type help.', 'c'); }
+        setTimeout(function () { input.focus(); }, 0);
+      }
+      function close() { term.hidden = true; input.blur(); }
+      $('termBtn').addEventListener('click', function () { term.hidden ? open() : close(); });
+      $('termX').addEventListener('click', close);
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { run(input.value); input.value = ''; }
+        else if (e.key === 'ArrowUp' && hi > 0) { input.value = hist[--hi]; e.preventDefault(); }
+        else if (e.key === 'ArrowDown') { hi = Math.min(hist.length, hi + 1); input.value = hist[hi] || ''; e.preventDefault(); }
+        else if (e.key === 'Escape') close();
+      });
+      addEventListener('keydown', function (e) {
+        if (e.target === input || /^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+        if (e.key === '`' || e.key === '~' || e.key === '§' || e.key === '½') { e.preventDefault(); term.hidden ? open() : close(); }
       });
     })();
 
