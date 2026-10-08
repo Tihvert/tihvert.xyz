@@ -717,7 +717,7 @@
       // "played this week": the calendar week mo..su. Past days come from the bot's history (it keeps
       // the six days before today, which always covers back to monday), today is live (todayMs).
       var week = $('week'), weekBars = $('weekBars'), weekTotal = $('weekTotal'), weekLegend = $('weekLegend');
-      var SEG = ['var(--accent)', 'var(--aur1)', 'var(--aur3)'], OTHER = 'var(--faint)';
+      var SEG = ['var(--accent)', 'var(--aur1)', 'var(--aur3)', '#f472b6', '#fbbf24', '#fb923c', '#34d399', '#60a5fa'], OTHER = 'var(--faint)';
       var BRAND = { 'Spotify': '#1DB954', 'Rainbow Six Siege': '#c4b5fd', 'Roblox': '#e2e8f0', 'Roblox Studio': '#00A2FF',
                     'VS Code': '#3FA7F5', 'Visual Studio': '#A57BE0', 'Minecraft': '#6ee7b7' };
       var WD = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
@@ -751,7 +751,7 @@
           all += d.sum; max = Math.max(max, d.sum);
         });
         if (all < 60000) { week.hidden = true; return; }
-        var top = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; }).slice(0, 3);
+        var top = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; }).slice(0, 8);
         var used = {}, palette = SEG.slice(), colors = {};
         top.forEach(function (n) { if (BRAND[n]) { colors[n] = BRAND[n]; used[BRAND[n]] = 1; } });
         top.forEach(function (n) { if (!colors[n]) colors[n] = palette.filter(function (c) { return !used[c]; })[0] || OTHER, used[colors[n]] = 1; });
