@@ -177,11 +177,11 @@
     .whead .ptime { margin-top: 0; }
     .wbars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
     .wcol { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
-    .wbar { width: 100%; max-width: 22px; height: 44px; display: flex; flex-direction: column-reverse; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, .04); }
+    .wbar { width: 100%; max-width: 22px; height: 44px; display: flex; flex-direction: column-reverse; border-radius: 4px; overflow: hidden; background: rgba(255, 255, 255, .07); }
     .wbar i { display: block; width: 100%; flex: none; transition: height .6s ease; }
-    .wday { font-size: 9px; color: var(--faint); }
-    .wday.now { color: var(--accent); }
-    .wcol.future { opacity: .4; }
+    .wday { font-size: 10px; color: var(--muted); }
+    .wday.now { color: var(--accent); font-weight: 600; }
+    .wcol.future { opacity: .55; }
     .wlegend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 8px; font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .wlegend span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
     .wlegend b { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
