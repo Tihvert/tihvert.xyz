@@ -496,17 +496,22 @@
       if (!reduce) title();
 
       var link = $('favicon'), img = new Image(), fc = document.createElement('canvas');
-      fc.width = fc.height = 64; var fx = fc.getContext('2d'), ph = 0;
+      fc.width = fc.height = 64; var fx = fc.getContext('2d');
       img.onload = function () {
         if (reduce) return;
-        setInterval(function () {
-          ph += 0.25;
+        // One pulse is drawn once as 25 frames and then cycled. Rendering a new, always-unique data URL
+        // every 200 ms is the likely cause of tabs left open for hours crashing with Out of Memory.
+        var frames = [], i = 0;
+        for (var k = 0; k < 25; k++) {
           fx.clearRect(0, 0, 64, 64);
           fx.save(); fx.beginPath(); fx.arc(32, 32, 26, 0, 6.3); fx.clip();
           fx.drawImage(img, 6, 6, 52, 52); fx.restore();
           fx.beginPath(); fx.arc(32, 32, 29, 0, 6.3);
-          fx.lineWidth = 4; fx.strokeStyle = 'rgba(196,181,253,' + (0.35 + 0.35 * Math.sin(ph)) + ')'; fx.stroke();
-          link.href = fc.toDataURL('image/png');
+          fx.lineWidth = 4; fx.strokeStyle = 'rgba(196,181,253,' + (0.35 + 0.35 * Math.sin(k / 25 * 2 * Math.PI)).toFixed(3) + ')'; fx.stroke();
+          frames.push(fc.toDataURL('image/png'));
+        }
+        setInterval(function () {
+          link.href = frames[i = (i + 1) % frames.length];
         }, 200);
       };
       img.src = 'favicon.png';
