@@ -888,11 +888,21 @@
         username: function () { return cur && cur.discord_user && cur.discord_user.username; },
         start: function () {
           if (!STATUS_API || !window.fetch) return;
-          fetch(STATUS_API + '/v1/presence')
-            .then(function (r) { return r.json(); })
-            .then(function (j) { if (j && j.success) render(j.data); })
-            .catch(function () { /* bot offline: the card simply has no live block until the stream reconnects */ })
-            .then(live);
+          // The stream starts right away instead of waiting on the first fetch: a request that hangs
+          // (flaky connection to the relay) used to keep the whole live block hidden until a reload.
+          live();
+          (function load(tries) {
+            var ac = window.AbortController ? new AbortController() : null;
+            var timer = ac && setTimeout(function () { ac.abort(); }, 6000);
+            fetch(STATUS_API + '/v1/presence', ac ? { signal: ac.signal } : undefined)
+              .then(function (r) { return r.json(); })
+              .then(function (j) { clearTimeout(timer); if (j && j.success) render(j.data); })
+              .catch(function () {
+                clearTimeout(timer);
+                // bot offline or the request timed out: try again unless the stream got data meanwhile
+                if (!cur && tries < 5) setTimeout(function () { load(tries + 1); }, 3000);
+              });
+          })(0);
         }
       };
     })();
