@@ -733,7 +733,7 @@
       function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
       function renderWeek(now) {
         var pt = cur && cur.playtime;
-        if (!pt || !pt.week || !pt.date) { week.hidden = true; return; }
+        if (!pt || !pt.week || !pt.date) { week.hidden = false; if (!weekTotal.textContent) weekTotal.textContent = 'unavailable'; return; }
         var past = {};
         pt.week.forEach(function (w) {
           var o = {}; for (var g in w.games) o[g] = w.games[g] * 1000;
@@ -755,7 +755,7 @@
           for (var k in d.games) { totals[k] = (totals[k] || 0) + d.games[k]; d.sum += d.games[k]; }
           all += d.sum; max = Math.max(max, d.sum);
         });
-        if (all < 60000) { week.hidden = true; return; }
+        // Keep the chart visible with zero/sub-minute totals, including when the reporter is offline.
         var top = Object.keys(totals).sort(function (a, b) { return totals[b] - totals[a]; }).slice(0, 8);
         var used = {}, palette = SEG.slice(), colors = {};
         top.forEach(function (n) { if (BRAND[n]) { colors[n] = BRAND[n]; used[BRAND[n]] = 1; } });
