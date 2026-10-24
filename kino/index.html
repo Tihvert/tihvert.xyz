@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kino – elokuvat ja sarjat yhdessä sovelluksessa</title>
+  <meta name="description" content="Kino on Windows-sovellus elokuvien ja sarjojen katsomiseen: oma soitin, suomitekstitykset, jatka katsomista ja päivitykset suoraan sovelluksesta.">
+  <meta name="theme-color" content="#4f7df3">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tihvert.xyz">
+  <meta property="og:url" content="https://tihvert.xyz/kino/">
+  <meta property="og:title" content="Kino">
+  <meta property="og:description" content="Elokuvat ja sarjat yhdessä sovelluksessa. Lataa Windowsille.">
+  <meta property="og:image" content="https://tihvert.xyz/kino/home.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050507;
+      --raised: #0e0f14;
+      --line: rgba(255, 255, 255, 0.09);
+      --text: #eef0f4;
+      --muted: #a8aebb;
+      --faint: #6b7080;
+      --accent: #7aa2ff;
+      --accent-deep: #4f7df3;
+      --aur1: #6ee7b7;
+      --aur2: #a78bfa;
+      --aur3: #7dd3fc;
+      --ok: #6fd39a;
+      --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+      --sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 var(--sans);
+      -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+
+    /* The site's aurora, leaning toward Kino's blue */
+    .glow { position: fixed; inset: -20vh -10vw auto; height: 90vh; z-index: 0; pointer-events: none; filter: blur(60px); opacity: .55;
+      background:
+        radial-gradient(40% 50% at 22% 30%, rgba(79,125,243,.55), transparent 70%),
+        radial-gradient(35% 45% at 70% 20%, rgba(167,139,250,.35), transparent 70%),
+        radial-gradient(30% 40% at 85% 55%, rgba(125,211,252,.22), transparent 70%),
+        radial-gradient(30% 35% at 45% 65%, rgba(110,231,183,.12), transparent 70%);
+      animation: drift 22s ease-in-out infinite alternate; }
+    @keyframes drift { to { transform: translate3d(3vw, 4vh, 0) scale(1.06); } }
+    .grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    .wrap { position: relative; z-index: 1; width: min(1180px, 100%); margin: 0 auto; padding-inline: clamp(16px, 4vw, 40px); }
+
+    /* Bar */
+    header.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; backdrop-filter: blur(14px); background: rgba(5,5,7,.6); border-bottom: 1px solid var(--line); }
+    header.bar .wrap { display: flex; align-items: center; gap: 20px; min-height: 60px; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; font-size: 20px; letter-spacing: -.01em; }
+    .logo svg { width: 26px; height: 26px; }
+    .bar nav { margin-left: auto; display: flex; gap: 4px; font: 13px var(--mono); }
+    .bar nav a { color: var(--muted); text-decoration: none; padding: 8px 10px; border-radius: 8px; transition: color .2s, background .2s; }
+    .bar nav a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .bar .home { font: 13px var(--mono); color: var(--faint); text-decoration: none; }
+    .bar .home:hover { color: var(--text); }
+
+    /* Hero */
+    .hero { padding-block: clamp(56px, 10vw, 120px) 40px; text-align: center; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 12px var(--mono); color: var(--muted); padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.03); }
+    .eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+    h1 { margin: 22px auto 0; max-width: 14ch; font-size: clamp(40px, 7.4vw, 84px); line-height: 1.02; letter-spacing: -.035em; font-weight: 800; }
+    h1 .grad { background: linear-gradient(100deg, #8aabff 10%, #c4b5fd 55%, #7dd3fc 95%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { margin: 22px auto 0; max-width: 56ch; color: var(--muted); font-size: clamp(16px, 1.6vw, 19px); }
+    .cta { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .btn { display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 12px; font-weight: 600; font-size: 16px; text-decoration: none; transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .2s; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { color: #0a1020; background: linear-gradient(180deg, #9bb9ff, var(--accent)); box-shadow: 0 10px 34px rgba(79,125,243,.45), inset 0 1px 0 rgba(255,255,255,.5); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 44px rgba(79,125,243,.55), inset 0 1px 0 rgba(255,255,255,.5); }
+    .btn-ghost { color: var(--text); border: 1px solid var(--line); background: rgba(255,255,255,.04); }
+    .btn-ghost:hover { background: rgba(255,255,255,.08); }
+    .btn svg { width: 20px; height: 20px; flex: none; }
+    .meta { margin-top: 14px; font: 12px var(--mono); color: var(--faint); }
+
+    /* Window frame around screenshots */
+    .window { border-radius: 14px; border: 1px solid rgba(255,255,255,.12); background: #0c0d10; overflow: hidden;
+      box-shadow: 0 40px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.4), 0 0 90px rgba(79,125,243,.18); }
+    .window .chrome { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; background: #090a0c; border-bottom: 1px solid var(--line); font: 11px var(--mono); color: var(--faint); }
+    .window .chrome b { font-weight: 400; margin-right: auto; }
+    .window .chrome span { width: 10px; height: 2px; background: var(--faint); opacity: .6; }
+    .window img { width: 100%; height: auto; aspect-ratio: 1440 / 900; object-fit: cover; }
+    .stage { margin-top: clamp(48px, 7vw, 80px); perspective: 1800px; }
+    .stage .window { transform: rotateX(8deg) scale(.98); transform-origin: 50% 0; transition: transform 1.2s var(--ease); }
+    .stage.in .window { transform: none; }
+
+    /* Sections */
+    section { padding-block: clamp(64px, 10vw, 120px); }
+    .kicker { font: 12px var(--mono); color: var(--accent); letter-spacing: .08em; text-transform: uppercase; }
+    h2 { margin: 12px 0 0; font-size: clamp(30px, 4.4vw, 48px); line-height: 1.08; letter-spacing: -.025em; font-weight: 750; }
+    .sub { color: var(--muted); max-width: 52ch; margin-top: 14px; }
+
+    .show { display: grid; grid-template-columns: 1fr 1.35fr; gap: clamp(28px, 5vw, 64px); align-items: center; }
+    .show + .show { margin-top: clamp(72px, 10vw, 120px); }
+    .show.flip { grid-template-columns: 1.35fr 1fr; }
+    .show.flip .copy { order: 2; }
+    .ticks { list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 10px; }
+    .ticks li { display: flex; gap: 10px; color: var(--muted); }
+    .ticks li::before { content: ''; flex: none; width: 18px; height: 18px; margin-top: 3px; border-radius: 6px;
+      background: rgba(122,162,255,.14) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='%237aa2ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat; }
+
+    .grid { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { padding: 22px; border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.01)); transition: border-color .3s, transform .3s var(--ease); }
+    .card:hover { border-color: rgba(122,162,255,.35); transform: translateY(-3px); }
+    .card h3 { margin: 14px 0 6px; font-size: 17px; letter-spacing: -.01em; }
+    .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+    .ico { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: rgba(122,162,255,.12); color: var(--accent); }
+    .ico svg { width: 20px; height: 20px; }
+
+    .steps { margin-top: 40px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: s; }
+    .step { position: relative; padding: 24px 22px 22px; border-radius: 14px; border: 1px solid var(--line); background: var(--raised); }
+    .step::before { counter-increment: s; content: '0' counter(s); font: 600 12px var(--mono); color: var(--accent); }
+    .step h3 { margin: 10px 0 6px; font-size: 17px; }
+    .step p { margin: 0; color: var(--muted); font-size: 14.5px; }
+    .step code { font: 12.5px var(--mono); color: var(--text); background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 5px; }
+
+    .notes { margin-top: 32px; padding: 24px; border-radius: 14px; border: 1px solid var(--line); background: var(--raised); font: 13.5px/1.75 var(--mono); color: var(--muted); }
+    .notes h3 { margin: 0 0 10px; font: 600 15px var(--sans); color: var(--text); }
+    .notes ul { margin: 0; padding-left: 18px; }
+
+    .final { text-align: center; }
+    .final .cta { margin-top: 28px; }
+    footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font: 12px/1.7 var(--mono); color: var(--faint); }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+    footer p { margin: 0; max-width: 70ch; }
+
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 860px) {
+      .show, .show.flip { grid-template-columns: 1fr; }
+      .show.flip .copy { order: 0; }
+      .grid, .steps { grid-template-columns: 1fr; }
+      .bar nav { display: none; }
+    }
+    @media (min-width: 861px) and (max-width: 1040px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (prefers-reduced-motion: reduce) {
+      .glow { animation: none; }
+      .reveal, .stage .window { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="bar">
+    <div class="wrap">
+      <a class="logo" href="#top" aria-label="Kino">
+        <svg viewBox="0 0 467 452" aria-hidden="true"><defs><linearGradient id="kg" gradientUnits="userSpaceOnUse" x1="0" y1="452" x2="466" y2="0"><stop offset="0" stop-color="#4F7DF3"/><stop offset="1" stop-color="#8AABFF"/></linearGradient></defs><path fill="url(#kg)" fill-rule="evenodd" d="M0 22A22 22 0 0 1 22 0L119 0A22 22 0 0 1 141 22L141 111.27A7 7 0 0 0 152.68 116.48L277.44 4.11A16 16 0 0 1 288.14 0L426.27 0A9 9 0 0 1 432.85 15.14L265.69 194.06A6 6 0 0 0 265.53 202.08L466.23 433.8A11 11 0 0 1 457.92 452L286.1 452A16 16 0 0 1 275.45 447.94L152.66 338.4A7 7 0 0 0 141 343.63L141 430A22 22 0 0 1 119 452L22 452A22 22 0 0 1 0 430ZM127 174.79A9 9 0 0 1 140.59 167.05L248.93 231.26A9 9 0 0 1 248.93 246.74L140.59 310.95A9 9 0 0 1 127 303.21Z"/></svg>
+        Kino
+      </a>
+      <nav aria-label="Sivun osiot">
+        <a href="#ominaisuudet">Ominaisuudet</a>
+        <a href="#aloitus">Aloitus</a>
+        <a href="#uutta">Mitä uutta</a>
+      </nav>
+      <a class="home" href="/">← tihvert.xyz</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <span class="eyebrow"><i></i><span data-version-label>Versio 0.2.1</span> · Windows 10 ja 11</span>
+      <h1>Elokuvat ja sarjat. <span class="grad">Yksi sovellus.</span></h1>
+      <p class="lead">Kino hakee nimikkeet, löytää parhaan version ja toistaa sen omassa soittimessaan suomitekstityksineen. Jatka siitä mihin jäit, ohita alkutekstit ja anna Kinon päivittää itsensä.</p>
+      <div class="cta">
+        <a class="btn btn-primary" data-download href="https://tihvert.xyz/kino/Kino_0.2.1_x64-setup.exe">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg>
+          Lataa Windowsille
+        </a>
+        <a class="btn btn-ghost" href="#aloitus">Näin pääset alkuun</a>
+      </div>
+      <p class="meta"><span data-size>40 Mt</span> · 64-bittinen · ilmainen</p>
+
+      <div class="stage reveal" id="stage">
+        <div class="window">
+          <div class="chrome" aria-hidden="true"><b>Kino</b><span></span><span></span><span></span></div>
+          <img src="home.webp" width="1440" height="900" alt="Kinon etusivu: suuri esittelykuva, Toista- ja Listalle-napit sekä Jatka katsomista -rivi." fetchpriority="high">
+        </div>
+      </div>
+    </div>
+
+    <section id="ominaisuudet">
+      <div class="wrap">
+        <div class="show reveal">
+          <div class="copy">
+            <div class="kicker">Versiot</div>
+            <h2>Paras versio valitaan puolestasi.</h2>
+            <p class="sub">Kino kysyy lähteiltä kaikki versiot ja nostaa ylimmäksi sen, joka on valmiina palvelussasi ja sopii laadultaan. Halutessasi valitset itse.</p>
+            <ul class="ticks">
+              <li>4K, 1080p ja 720p yhdellä napautuksella</li>
+              <li>Real-Debrid, AllDebrid, TorBox ja muut, myös useampi kerralla</li>
+              <li>Jos versio pätkii, Kino ehdottaa kevyempää</li>
+            </ul>
+          </div>
+          <div class="window"><div class="chrome" aria-hidden="true"><b>Kino</b><span></span><span></span><span></span></div>
+            <img src="title.webp" width="1440" height="900" loading="lazy" alt="Elokuvan sivu: arvosanat, Toista-nappi ja oikealla Versiot-paneeli laatuineen ja koko­tietoineen.">
+          </div>
+        </div>
+
+        <div class="show flip reveal">
+          <div class="copy">
+            <div class="kicker">Soitin</div>
+            <h2>Suomitekstit, jotka oikeasti löytyvät.</h2>
+            <p class="sub">Kino etsii tekstitykset OpenSubtitlesista, SubDL:stä, SubSourcesta ja lisäosista ja valitsee sen, joka osuu juuri tähän versioon. Jos yksi ei lataudu, seuraava tulee tilalle.</p>
+            <ul class="ticks">
+              <li>Viive, koko ja sijainti suoraan soittimessa</li>
+              <li>Intron, kertauksen ja lopputekstien ohitus</li>
+              <li>Yötila tasoittaa äänet myöhäisillan katseluun</li>
+            </ul>
+          </div>
+          <div class="window"><div class="chrome" aria-hidden="true"><b>Kino</b><span></span><span></span><span></span></div>
+            <img src="player.webp" width="1440" height="900" loading="lazy" alt="Kinon soitin, jossa tekstitysvalikko on auki: kielet, versiot sekä viive, koko ja sijainti.">
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></div><h3>Jatka siitä mihin jäit</h3><p>Seuraava jakso on valmiina, kun edellinen loppuu.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><h3>Kalenteri</h3><p>Uudet jaksot yhdessä näkymässä ja ilmoitus Windowsiin.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div><h3>Trakt</h3><p>Katsotut, lista ja arvosanat pysyvät samoina kaikkialla.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div><h3>Päivittyy itse</h3><p>Uusi versio näkyy yläpalkissa. Yksi napautus ja valmista.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></div><h3>Näppäimistö ja kaukosäädin</h3><p>Nuolet ja Enter toimivat joka sivulla, myös sohvalta.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z"/></svg></div><h3>Avaimet turvassa</h3><p>Palveluiden avaimet tallentuvat Windowsin omaan avainvarastoon.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="aloitus">
+      <div class="wrap">
+        <div class="kicker">Aloitus</div>
+        <h2>Kolme askelta katsomaan.</h2>
+        <div class="steps">
+          <div class="step reveal"><h3>Lataa ja asenna</h3><p>Avaa ladattu tiedosto. Jos Windows varoittaa tuntemattomasta julkaisijasta, valitse <code>Lisätietoja</code> ja <code>Suorita kuitenkin</code>.</p></div>
+          <div class="step reveal"><h3>Käy käyttöönotto läpi</h3><p>Kino kysyy kielet ja palvelut. Jokaisessa kohdassa on nappi tilin luontiin ja ohje avaimen löytämiseen.</p></div>
+          <div class="step reveal"><h3>Paina Toista</h3><p>Valitse elokuva tai sarja. Kino hoitaa version ja tekstitykset, ja päivitykset tulevat jatkossa suoraan sovellukseen.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="uutta">
+      <div class="wrap">
+        <div class="kicker">Mitä uutta</div>
+        <h2 data-notes-title>Versio 0.2.1</h2>
+        <div class="notes reveal">
+          <ul data-notes>
+            <li>Trakt-kirjautuminen korjattu: Kino näyttää koodin, avaa Traktin sivun ja huomaa itse, kun olet hyväksynyt sen</li>
+            <li>Jokaisessa palvelussa on "Luo tili" -nappi ja lyhyt ohje, mistä avaimen löytää</li>
+            <li>OpenSubtitles-kirjautumisen viereen tuli "Luo OpenSubtitles-tili"</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="final">
+      <div class="wrap">
+        <h2>Valmis katsomaan?</h2>
+        <div class="cta">
+          <a class="btn btn-primary" data-download href="https://tihvert.xyz/kino/Kino_0.2.1_x64-setup.exe">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg>
+            Lataa Windowsille
+          </a>
+        </div>
+        <p class="meta"><span data-version-label>Versio 0.2.1</span> · Windows 10 ja 11</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Kino ei tallenna eikä jaa elokuvia tai sarjoja. Se käyttää palveluita ja lisäosia, jotka valitset itse. Käytä vain sisältöä, johon sinulla on oikeus.</p>
+      <p>Tekijä <a href="/">tihvert.xyz</a> · Tiedot ja kuvat: TMDB · Tekstitykset: OpenSubtitles.com</p>
+    </div>
+  </footer>
+
+  <script>
+    // The newest version, its download link and its notes come from the same latest.json Kino itself reads for updates.
+    (async () => {
+      try {
+        const res = await fetch('latest.json', { cache: 'no-store' });
+        if (!res.ok) return;
+        const j = await res.json();
+        const v = typeof j.version === 'string' ? j.version : null;
+        const url = j.platforms && j.platforms['windows-x86_64'] && j.platforms['windows-x86_64'].url;
+        if (!v || typeof url !== 'string' || !url.startsWith('https://tihvert.xyz/kino/')) return;
+        document.querySelectorAll('[data-download]').forEach((a) => { a.href = url; });
+        document.querySelectorAll('[data-version-label]').forEach((s) => { s.textContent = 'Versio ' + v; });
+        const title = document.querySelector('[data-notes-title]');
+        if (title) title.textContent = 'Versio ' + v;
+        const list = document.querySelector('[data-notes]');
+        if (list && typeof j.notes === 'string') {
+          const items = j.notes.split('\n').map((l) => l.replace(/^\s*-\s*/, '').trim()).filter(Boolean);
+          if (items.length) { list.replaceChildren(...items.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; })); }
+        }
+      } catch (_) { /* the static link and notes stay */ }
+    })();
+
+    // Sections rise in as they come into view; the hero window un-tilts.
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>
