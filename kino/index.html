@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Kino – elokuvat ja sarjat yhdessä sovelluksessa</title>
-  <meta name="description" content="Kino on Windows-sovellus elokuvien ja sarjojen katsomiseen: oma soitin, suomitekstitykset, jatka katsomista ja päivitykset suoraan sovelluksesta.">
+  <meta name="description" content="Kino on Windows-sovellus elokuvien ja sarjojen katsomiseen: oma soitin, tekstitykset, jatka katsomista ja päivitykset suoraan sovelluksesta.">
   <meta name="theme-color" content="#4f7df3">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="tihvert.xyz">
@@ -67,6 +67,10 @@
     .bar nav { margin-left: auto; display: flex; gap: 4px; font: 13px var(--mono); }
     .bar nav a { color: var(--muted); text-decoration: none; padding: 8px 10px; border-radius: 8px; transition: color .2s, background .2s; }
     .bar nav a:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .field-note { color: var(--faint); font-size: 13px; margin: 0 0 8px; }
+    .lang { display: flex; gap: 2px; font: 12px var(--mono); }
+    .lang button { background: none; border: 1px solid var(--line); color: var(--muted); padding: 5px 9px; border-radius: 7px; cursor: pointer; font: inherit; }
+    .lang button[aria-pressed="true"] { color: var(--text); background: rgba(255,255,255,.08); }
     .bar .home { font: 13px var(--mono); color: var(--faint); text-decoration: none; }
     .bar .home:hover { color: var(--text); }
 
@@ -166,32 +170,31 @@
         Kino
       </a>
       <nav aria-label="Sivun osiot">
-        <a href="#ominaisuudet">Ominaisuudet</a>
-        <a href="#aloitus">Aloitus</a>
-        <a href="#uutta">Mitä uutta</a>
+        <a href="#ominaisuudet" data-i18n="nav1">Ominaisuudet</a>
+        <a href="#aloitus" data-i18n="nav2">Aloitus</a>
+        <a href="#uutta" data-i18n="nav3">Mitä uutta</a>
       </nav>
+      <div class="lang" role="group" aria-label="Language"><button type="button" data-lang="fi">FI</button><button type="button" data-lang="en">EN</button></div>
       <a class="home" href="/">← tihvert.xyz</a>
     </div>
   </header>
 
   <main id="top">
     <div class="wrap hero">
-      <span class="eyebrow"><i></i><span data-version-label>Versio 0.2.1</span> · Windows 10 ja 11</span>
-      <h1>Elokuvat ja sarjat. <span class="grad">Yksi sovellus.</span></h1>
-      <p class="lead">Kino hakee nimikkeet, löytää parhaan version ja toistaa sen omassa soittimessaan suomitekstityksineen. Jatka siitä mihin jäit, ohita alkutekstit ja anna Kinon päivittää itsensä.</p>
+      <span class="eyebrow"><i></i><span data-version-label>Versio 0.2.1</span> · <span data-i18n="plat">Windows 10 ja 11</span></span>
+      <h1 data-i18n-html="h1">Elokuvat ja sarjat. <span class="grad">Yksi sovellus.</span></h1>
+      <p class="lead" data-i18n="lead">Kino hakee nimikkeet, löytää parhaan version ja toistaa sen omassa soittimessaan tekstityksineen. Jatka siitä mihin jäit, ohita alkutekstit ja anna Kinon päivittää itsensä.</p>
       <div class="cta">
         <a class="btn btn-primary" data-download href="https://tihvert.xyz/kino/Kino_0.2.1_x64-setup.exe">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg>
-          Lataa Windowsille
-        </a>
-        <a class="btn btn-ghost" href="#aloitus">Näin pääset alkuun</a>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg><span data-i18n="dl">Lataa Windowsille</span></a>
+        <a class="btn btn-ghost" href="#aloitus" data-i18n="start">Näin pääset alkuun</a>
       </div>
-      <p class="meta"><span data-size>40 Mt</span> · 64-bittinen · ilmainen</p>
+      <p class="meta"><span data-i18n="size">40 Mt</span> · <span data-i18n="meta">64-bittinen · ilmainen</span></p>
 
       <div class="stage reveal" id="stage">
         <div class="window">
           <div class="chrome" aria-hidden="true"><b>Kino</b><span></span><span></span><span></span></div>
-          <img src="home.webp" width="1440" height="900" alt="Kinon etusivu: suuri esittelykuva, Toista- ja Listalle-napit sekä Jatka katsomista -rivi." fetchpriority="high">
+          <img src="home.webp" width="1440" height="900" data-i18n-alt="alt1" alt="Kinon etusivu: suuri esittelykuva, Toista- ja Listalle-napit sekä Jatka katsomista -rivi." fetchpriority="high">
         </div>
       </div>
     </div>
@@ -200,64 +203,65 @@
       <div class="wrap">
         <div class="show reveal">
           <div class="copy">
-            <div class="kicker">Versiot</div>
-            <h2>Paras versio valitaan puolestasi.</h2>
-            <p class="sub">Kino kysyy lähteiltä kaikki versiot ja nostaa ylimmäksi sen, joka on valmiina palvelussasi ja sopii laadultaan. Halutessasi valitset itse.</p>
+            <div class="kicker" data-i18n="k1">Versiot</div>
+            <h2 data-i18n="h2a">Paras versio valitaan puolestasi.</h2>
+            <p class="sub" data-i18n="sub1">Kino kysyy lähteiltä kaikki versiot ja nostaa ylimmäksi sen, joka on valmiina palvelussasi ja sopii laadultaan. Halutessasi valitset itse.</p>
             <ul class="ticks">
-              <li>4K, 1080p ja 720p yhdellä napautuksella</li>
-              <li>Real-Debrid, AllDebrid, TorBox ja muut, myös useampi kerralla</li>
-              <li>Jos versio pätkii, Kino ehdottaa kevyempää</li>
+              <li data-i18n="t1">4K, 1080p ja 720p yhdellä napautuksella</li>
+              <li data-i18n="t2">Real-Debrid, AllDebrid, TorBox ja muut, myös useampi kerralla</li>
+              <li data-i18n="t3">Jos versio pätkii, Kino ehdottaa kevyempää</li>
             </ul>
           </div>
           <div class="window"><div class="chrome" aria-hidden="true"><b>Kino</b><span></span><span></span><span></span></div>
-            <img src="title.webp" width="1440" height="900" loading="lazy" alt="Elokuvan sivu: arvosanat, Toista-nappi ja oikealla Versiot-paneeli laatuineen ja koko­tietoineen.">
+            <img src="title.webp" width="1440" height="900" loading="lazy" data-i18n-alt="alt2" alt="Elokuvan sivu: arvosanat, Toista-nappi ja oikealla Versiot-paneeli laatuineen ja koko­tietoineen.">
           </div>
         </div>
 
         <div class="show flip reveal">
           <div class="copy">
-            <div class="kicker">Soitin</div>
-            <h2>Suomitekstit, jotka oikeasti löytyvät.</h2>
-            <p class="sub">Kino etsii tekstitykset OpenSubtitlesista, SubDL:stä, SubSourcesta ja lisäosista ja valitsee sen, joka osuu juuri tähän versioon. Jos yksi ei lataudu, seuraava tulee tilalle.</p>
+            <div class="kicker" data-i18n="k2">Soitin</div>
+            <h2 data-i18n="h2b">Tekstitykset ja kunnollinen soitin.</h2>
+            <p class="sub" data-i18n="sub2">Kino hakee tekstitykset usealta palvelulta, valitsee oman kielesi ja sopivimman version. Jos valittu tekstitys ei lataudu, Kino kokeilee automaattisesti seuraavaa samalla kielellä.</p>
             <ul class="ticks">
-              <li>Viive, koko ja sijainti suoraan soittimessa</li>
-              <li>Intron, kertauksen ja lopputekstien ohitus</li>
-              <li>Yötila tasoittaa äänet myöhäisillan katseluun</li>
+              <li data-i18n="t4">Viive, koko ja sijainti suoraan soittimessa</li>
+              <li data-i18n="t5">Intron, kertauksen ja lopputekstien ohitus</li>
+              <li data-i18n="t6">Yötila tasoittaa äänet myöhäisillan katseluun</li>
             </ul>
           </div>
           <div class="window"><div class="chrome" aria-hidden="true"><b>Kino</b><span></span><span></span><span></span></div>
-            <img src="player.webp" width="1440" height="900" loading="lazy" alt="Kinon soitin, jossa tekstitysvalikko on auki: kielet, versiot sekä viive, koko ja sijainti.">
+            <img src="player.webp" width="1440" height="900" loading="lazy" data-i18n-alt="alt3" alt="Kinon soitin, jossa tekstitysvalikko on auki: kielet, versiot sekä viive, koko ja sijainti.">
           </div>
         </div>
 
         <div class="grid">
-          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></div><h3>Jatka siitä mihin jäit</h3><p>Seuraava jakso on valmiina, kun edellinen loppuu.</p></div>
-          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><h3>Kalenteri</h3><p>Uudet jaksot yhdessä näkymässä ja ilmoitus Windowsiin.</p></div>
-          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div><h3>Trakt</h3><p>Katsotut, lista ja arvosanat pysyvät samoina kaikkialla.</p></div>
-          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div><h3>Päivittyy itse</h3><p>Uusi versio näkyy yläpalkissa. Yksi napautus ja valmista.</p></div>
-          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></div><h3>Näppäimistö ja kaukosäädin</h3><p>Nuolet ja Enter toimivat joka sivulla, myös sohvalta.</p></div>
-          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z"/></svg></div><h3>Avaimet turvassa</h3><p>Palveluiden avaimet tallentuvat Windowsin omaan avainvarastoon.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></div><h3 data-i18n="c1h">Jatka siitä mihin jäit</h3><p data-i18n="c1p">Seuraava jakso on valmiina, kun edellinen loppuu.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div><h3 data-i18n="c2h">Kalenteri</h3><p data-i18n="c2p">Uudet jaksot yhdessä näkymässä ja ilmoitus Windowsiin.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></div><h3 data-i18n="c3h">Trakt</h3><p data-i18n="c3p">Katsotut, lista ja arvosanat pysyvät samoina kaikkialla.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div><h3 data-i18n="c4h">Päivittyy itse</h3><p data-i18n="c4p">Uusi versio näkyy yläpalkissa. Yksi napautus ja valmista.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg></div><h3 data-i18n="c5h">Näppäimistö ja kaukosäädin</h3><p data-i18n="c5p">Nuolet ja Enter toimivat joka sivulla, myös sohvalta.</p></div>
+          <div class="card reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 4v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-4z"/></svg></div><h3 data-i18n="c6h">Avaimet turvassa</h3><p data-i18n="c6p">Palveluiden avaimet tallentuvat Windowsin omaan avainvarastoon.</p></div>
         </div>
       </div>
     </section>
 
     <section id="aloitus">
       <div class="wrap">
-        <div class="kicker">Aloitus</div>
-        <h2>Kolme askelta katsomaan.</h2>
+        <div class="kicker" data-i18n="k3">Aloitus</div>
+        <h2 data-i18n="h2c">Kolme askelta katsomaan.</h2>
         <div class="steps">
-          <div class="step reveal"><h3>Lataa ja asenna</h3><p>Avaa ladattu tiedosto. Jos Windows varoittaa tuntemattomasta julkaisijasta, valitse <code>Lisätietoja</code> ja <code>Suorita kuitenkin</code>.</p></div>
-          <div class="step reveal"><h3>Käy käyttöönotto läpi</h3><p>Kino kysyy kielet ja palvelut. Jokaisessa kohdassa on nappi tilin luontiin ja ohje avaimen löytämiseen.</p></div>
-          <div class="step reveal"><h3>Paina Toista</h3><p>Valitse elokuva tai sarja. Kino hoitaa version ja tekstitykset, ja päivitykset tulevat jatkossa suoraan sovellukseen.</p></div>
+          <div class="step reveal"><h3 data-i18n="s1h">Lataa ja asenna</h3><p data-i18n-html="s1p">Avaa ladattu tiedosto. Jos Windows varoittaa tuntemattomasta julkaisijasta, valitse <code>Lisätietoja</code> ja <code>Suorita kuitenkin</code>.</p></div>
+          <div class="step reveal"><h3 data-i18n="s2h">Käy käyttöönotto läpi</h3><p data-i18n="s2p">Kino kysyy kielet ja palvelut. Jokaisessa kohdassa on nappi tilin luontiin ja ohje avaimen löytämiseen.</p></div>
+          <div class="step reveal"><h3 data-i18n="s3h">Paina Toista</h3><p data-i18n="s3p">Valitse elokuva tai sarja. Kino hoitaa version ja tekstitykset, ja päivitykset tulevat jatkossa suoraan sovellukseen.</p></div>
         </div>
       </div>
     </section>
 
     <section id="uutta">
       <div class="wrap">
-        <div class="kicker">Mitä uutta</div>
+        <div class="kicker" data-i18n="k4">Mitä uutta</div>
         <h2 data-notes-title>Versio 0.2.1</h2>
         <div class="notes reveal">
+          <p class="field-note" data-notes-hint hidden>Release notes are written in Finnish.</p>
           <ul data-notes>
             <li>Trakt-kirjautuminen korjattu: Kino näyttää koodin, avaa Traktin sivun ja huomaa itse, kun olet hyväksynyt sen</li>
             <li>Jokaisessa palvelussa on "Luo tili" -nappi ja lyhyt ohje, mistä avaimen löytää</li>
@@ -269,26 +273,50 @@
 
     <section class="final">
       <div class="wrap">
-        <h2>Valmis katsomaan?</h2>
+        <h2 data-i18n="h2d">Valmis katsomaan?</h2>
         <div class="cta">
           <a class="btn btn-primary" data-download href="https://tihvert.xyz/kino/Kino_0.2.1_x64-setup.exe">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg>
-            Lataa Windowsille
-          </a>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg><span data-i18n="dl">Lataa Windowsille</span></a>
         </div>
-        <p class="meta"><span data-version-label>Versio 0.2.1</span> · Windows 10 ja 11</p>
+        <p class="meta"><span data-version-label>Versio 0.2.1</span> · <span data-i18n="plat2">Windows 10 ja 11</span></p>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="wrap">
-      <p>Kino ei tallenna eikä jaa elokuvia tai sarjoja. Se käyttää palveluita ja lisäosia, jotka valitset itse. Käytä vain sisältöä, johon sinulla on oikeus.</p>
-      <p>Tekijä <a href="/">tihvert.xyz</a> · Tiedot ja kuvat: TMDB · Tekstitykset: OpenSubtitles.com</p>
+      <p data-i18n="f1">Kino ei tallenna eikä jaa elokuvia tai sarjoja. Se käyttää palveluita ja lisäosia, jotka valitset itse. Käytä vain sisältöä, johon sinulla on oikeus.</p>
+      <p data-i18n-html="f2">Tekijä <a href="/">tihvert.xyz</a> · Tiedot ja kuvat: TMDB · Tekstitykset: OpenSubtitles.com</p>
     </div>
   </footer>
 
   <script>
+    // Finnish / English: the Finnish text is in the HTML, the English text below. Chosen language: saved choice, else the browser's.
+    const I18N = {"nav1":["Ominaisuudet","Features"],"nav2":["Aloitus","Get started"],"nav3":["Mitä uutta","What's new"],"plat":["Windows 10 ja 11","Windows 10 and 11"],"h1":["Elokuvat ja sarjat. <span class=\"grad\">Yksi sovellus.</span>","Movies and series. <span class=\"grad\">One app.</span>"],"lead":["Kino hakee nimikkeet, löytää parhaan version ja toistaa sen omassa soittimessaan tekstityksineen. Jatka siitä mihin jäit, ohita alkutekstit ja anna Kinon päivittää itsensä.","Kino looks up titles, finds the best version and plays it in its own player with subtitles. Pick up where you left off, skip intros and let Kino update itself."],"dl":["Lataa Windowsille","Download for Windows"],"start":["Näin pääset alkuun","How to get started"],"size":["40 Mt","40 MB"],"meta":["64-bittinen · ilmainen","64-bit · free"],"alt1":["Kinon etusivu: suuri esittelykuva, Toista- ja Listalle-napit sekä Jatka katsomista -rivi.","Kino's home screen: a large featured title with Play and Add to list buttons, and a Continue watching row."],"alt2":["Elokuvan sivu: arvosanat, Toista-nappi ja oikealla Versiot-paneeli laatuineen ja koko­tietoineen.","A movie page: ratings, a Play button and, on the right, the Versions panel with quality and size."],"alt3":["Kinon soitin, jossa tekstitysvalikko on auki: kielet, versiot sekä viive, koko ja sijainti.","Kino's player with the subtitle menu open: languages, versions, delay, size and position."],"k1":["Versiot","Versions"],"h2a":["Paras versio valitaan puolestasi.","The best version is picked for you."],"sub1":["Kino kysyy lähteiltä kaikki versiot ja nostaa ylimmäksi sen, joka on valmiina palvelussasi ja sopii laadultaan. Halutessasi valitset itse.","Kino asks every source for versions and puts the one that is ready in your service and fits your quality first. You can always pick another."],"t1":["4K, 1080p ja 720p yhdellä napautuksella","4K, 1080p and 720p in one click"],"t2":["Real-Debrid, AllDebrid, TorBox ja muut, myös useampi kerralla","Real-Debrid, AllDebrid, TorBox and more, several at once"],"t3":["Jos versio pätkii, Kino ehdottaa kevyempää","If a version stutters, Kino suggests a lighter one"],"k2":["Soitin","Player"],"h2b":["Tekstitykset ja kunnollinen soitin.","Subtitles and a proper player."],"sub2":["Kino hakee tekstitykset usealta palvelulta, valitsee oman kielesi ja sopivimman version. Jos valittu tekstitys ei lataudu, Kino kokeilee automaattisesti seuraavaa samalla kielellä.","Kino fetches subtitles from several services and picks your language and the best match. If a subtitle fails to load, Kino automatically tries the next one in the same language."],"t4":["Viive, koko ja sijainti suoraan soittimessa","Delay, size and position right in the player"],"t5":["Intron, kertauksen ja lopputekstien ohitus","Skip intros, recaps and end credits"],"t6":["Yötila tasoittaa äänet myöhäisillan katseluun","Night mode evens out the sound for late viewing"],"c1h":["Jatka siitä mihin jäit","Pick up where you left off"],"c1p":["Seuraava jakso on valmiina, kun edellinen loppuu.","The next episode is ready when the last one ends."],"c2h":["Kalenteri","Calendar"],"c2p":["Uudet jaksot yhdessä näkymässä ja ilmoitus Windowsiin.","New episodes in one view, with a Windows notification."],"c3h":["Trakt","Trakt"],"c3p":["Katsotut, lista ja arvosanat pysyvät samoina kaikkialla.","Watched, your list and ratings stay in sync everywhere."],"c4h":["Päivittyy itse","Updates itself"],"c4p":["Uusi versio näkyy yläpalkissa. Yksi napautus ja valmista.","A new version shows up in the top bar. One click and done."],"c5h":["Näppäimistö ja kaukosäädin","Keyboard and remote"],"c5p":["Nuolet ja Enter toimivat joka sivulla, myös sohvalta.","Arrow keys and Enter work on every page, even from the couch."],"c6h":["Avaimet turvassa","Keys kept safe"],"c6p":["Palveluiden avaimet tallentuvat Windowsin omaan avainvarastoon.","Your service keys are stored in Windows' own credential store."],"k3":["Aloitus","Get started"],"h2c":["Kolme askelta katsomaan.","Three steps to watching."],"s1h":["Lataa ja asenna","Download and install"],"s1p":["Avaa ladattu tiedosto. Jos Windows varoittaa tuntemattomasta julkaisijasta, valitse <code>Lisätietoja</code> ja <code>Suorita kuitenkin</code>.","Open the downloaded file. If Windows warns about an unknown publisher, choose <code>More info</code> and <code>Run anyway</code>."],"s2h":["Käy käyttöönotto läpi","Go through the setup"],"s2p":["Kino kysyy kielet ja palvelut. Jokaisessa kohdassa on nappi tilin luontiin ja ohje avaimen löytämiseen.","Kino asks for your languages and services. Each step has a button to create an account and a hint on where to find the key."],"s3h":["Paina Toista","Press Play"],"s3p":["Valitse elokuva tai sarja. Kino hoitaa version ja tekstitykset, ja päivitykset tulevat jatkossa suoraan sovellukseen.","Pick a movie or series. Kino handles the version and subtitles, and updates arrive inside the app from now on."],"k4":["Mitä uutta","What's new"],"h2d":["Valmis katsomaan?","Ready to watch?"],"plat2":["Windows 10 ja 11","Windows 10 and 11"],"f1":["Kino ei tallenna eikä jaa elokuvia tai sarjoja. Se käyttää palveluita ja lisäosia, jotka valitset itse. Käytä vain sisältöä, johon sinulla on oikeus.","Kino does not store or share movies or series. It uses the services and add-ons you choose yourself. Only use content you have the right to."],"f2":["Tekijä <a href=\"/\">tihvert.xyz</a> · Tiedot ja kuvat: TMDB · Tekstitykset: OpenSubtitles.com","By <a href=\"/\">tihvert.xyz</a> · Data and images: TMDB · Subtitles: OpenSubtitles.com"],"title":["Kino – elokuvat ja sarjat yhdessä sovelluksessa","Kino – movies and series in one app"],"desc":["Kino on Windows-sovellus elokuvien ja sarjojen katsomiseen: oma soitin, tekstitykset, jatka katsomista ja päivitykset suoraan sovelluksesta.","Kino is a Windows app for watching movies and series: its own player, subtitles, continue watching and updates right in the app."]};
+    let lang = 'fi';
+    let ver = null;
+    try { const s = localStorage.getItem('kino-lang'); lang = s === 'en' || s === 'fi' ? s : (/^fi/i.test(navigator.language || '') ? 'fi' : 'en'); } catch (_) { lang = /^fi/i.test(navigator.language || '') ? 'fi' : 'en'; }
+    const idx = () => (lang === 'en' ? 1 : 0);
+    const versionWord = () => (lang === 'en' ? 'Version' : 'Versio');
+    function applyLang() {
+      const i = idx();
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach((el) => { const e = I18N[el.dataset.i18n]; if (e) el.textContent = e[i]; });
+      document.querySelectorAll('[data-i18n-html]').forEach((el) => { const e = I18N[el.dataset.i18nHtml]; if (e) el.innerHTML = e[i]; });
+      document.querySelectorAll('[data-i18n-alt]').forEach((el) => { const e = I18N[el.dataset.i18nAlt]; if (e) el.alt = e[i]; });
+      document.title = I18N.title[i];
+      const md = document.querySelector('meta[name="description"]'); if (md) md.content = I18N.desc[i];
+      document.querySelectorAll('[data-version-label]').forEach((s) => { s.textContent = versionWord() + ' ' + (ver || '0.2.1'); });
+      const nt = document.querySelector('[data-notes-title]'); if (nt) nt.textContent = versionWord() + ' ' + (ver || '0.2.1');
+      const hint = document.querySelector('[data-notes-hint]'); if (hint) hint.hidden = lang !== 'en';
+      document.querySelectorAll('.lang button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+    }
+    document.querySelectorAll('.lang button').forEach((b) => b.addEventListener('click', () => {
+      lang = b.dataset.lang;
+      try { localStorage.setItem('kino-lang', lang); } catch (_) { /* fine without */ }
+      applyLang();
+    }));
+
     // The newest version, its download link and its notes come from the same latest.json Kino itself reads for updates.
     (async () => {
       try {
@@ -299,9 +327,7 @@
         const url = j.platforms && j.platforms['windows-x86_64'] && j.platforms['windows-x86_64'].url;
         if (!v || typeof url !== 'string' || !url.startsWith('https://tihvert.xyz/kino/')) return;
         document.querySelectorAll('[data-download]').forEach((a) => { a.href = url; });
-        document.querySelectorAll('[data-version-label]').forEach((s) => { s.textContent = 'Versio ' + v; });
-        const title = document.querySelector('[data-notes-title]');
-        if (title) title.textContent = 'Versio ' + v;
+        ver = v; applyLang();
         const list = document.querySelector('[data-notes]');
         if (list && typeof j.notes === 'string') {
           const items = j.notes.split('\n').map((l) => l.replace(/^\s*-\s*/, '').trim()).filter(Boolean);
@@ -309,6 +335,7 @@
         }
       } catch (_) { /* the static link and notes stay */ }
     })();
+    applyLang();
 
     // Sections rise in as they come into view; the hero window un-tilts.
     const io = new IntersectionObserver((entries) => {
