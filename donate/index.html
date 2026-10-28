@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Support Tihvert</title>
+  <meta name="description" content="Support Tihvert's projects: Ko-fi (card, PayPal, Apple/Google Pay) or crypto (BTC, LTC).">
+  <meta name="theme-color" content="#5b21b6">
+  <link rel="canonical" href="https://tihvert.xyz/donate/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="tihvert.xyz">
+  <meta property="og:url" content="https://tihvert.xyz/donate/">
+  <meta property="og:title" content="Support Tihvert">
+  <meta property="og:description" content="Ko-fi or crypto (BTC, LTC). Totally optional, thanks either way.">
+  <meta property="og:image" content="https://tihvert.xyz/avatar.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="../favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050507;
+      --card: rgba(10, 10, 14, 0.72);
+      --line: rgba(255, 255, 255, 0.09);
+      --text: #e4e4e7;
+      --muted: #8b8b98;
+      --faint: #5a5a66;
+      --accent: #c4b5fd;
+      --kofi: #ff5e5b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      min-height: 100%;
+      background: radial-gradient(120% 80% at 50% 0%, #0d0a18 0%, var(--bg) 60%) var(--bg);
+      color: var(--text);
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+      display: grid; place-items: center;
+      padding: 40px 16px;
+    }
+    main { width: 100%; max-width: 440px; }
+    header { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+    header img { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--line); }
+    h1 { font-size: 20px; font-weight: 800; }
+    header p { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+      padding: 18px; margin-bottom: 14px;
+    }
+    .card h2 { font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: .04em; margin-bottom: 10px; }
+    .card p { color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .kofi {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: 12px; padding: 12px; border-radius: 10px;
+      background: var(--kofi); color: #fff; font-weight: 800; font-size: 14px; text-decoration: none;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .kofi:hover, .kofi:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 94, 91, .3); outline: none; }
+    .coin { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; }
+    .coin + .coin { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+    .qr { width: 112px; height: 112px; border-radius: 8px; overflow: hidden; background: #fff; }
+    .qr svg { width: 100%; height: 100%; display: block; }
+    .coin b { font-size: 13px; }
+    .coin small { display: block; color: var(--faint); font-size: 11px; margin-top: 2px; }
+    .addr {
+      display: block; margin-top: 8px; font-size: 11px; color: var(--text);
+      overflow-wrap: anywhere; user-select: all;
+    }
+    button.copy {
+      margin-top: 8px; padding: 6px 10px; border-radius: 8px;
+      background: transparent; border: 1px solid var(--line); color: var(--muted);
+      font: inherit; font-size: 11px; cursor: pointer;
+      transition: border-color .15s ease, color .15s ease;
+    }
+    button.copy:hover, button.copy:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+    footer { text-align: center; margin-top: 18px; font-size: 11px; color: var(--faint); }
+    footer a { color: var(--muted); }
+    @media (max-width: 380px) {
+      .coin { grid-template-columns: minmax(0, 1fr); }
+      .qr { margin: 0 auto; }
+    }
+    @media (prefers-reduced-motion: reduce) { .kofi { transition: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="../avatar.png" alt="" width="56" height="56">
+      <div>
+        <h1>Support Tihvert</h1>
+        <p>Totally optional, thanks either way.</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>KO-FI</h2>
+      <p>Card, PayPal, Apple Pay or Google Pay. One-time or monthly, from $1.</p>
+      <a class="kofi" href="https://ko-fi.com/tihvert" target="_blank" rel="noopener">Support on Ko-fi</a>
+    </section>
+
+    <section class="card">
+      <h2>CRYPTO</h2>
+      <div class="coin">
+        <div class="qr"><svg role="img" aria-label="Litecoin address QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h35v35H0z"/><path stroke="#0a0a0e" d="M1 1.5h7m1 0h2m2 0h2m1 0h1m2 0h2m3 0h1m2 0h7M1 2.5h1m5 0h1m2 0h2m2 0h2m1 0h1m1 0h2m6 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m3 0h3m1 0h8m4 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m2 0h1m3 0h3m3 0h3m2 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h1m2 0h3m2 0h2m1 0h1m1 0h2m3 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m2 0h5m1 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h3m1 0h1m1 0h1m2 0h1m1 0h3m2 0h1M1 9.5h1m3 0h1m1 0h4m2 0h1m2 0h2m5 0h2m1 0h5m2 0h1M3 10.5h4m4 0h3m2 0h1m1 0h2m1 0h2m1 0h1m1 0h1m1 0h1M2 11.5h1m1 0h7m1 0h5m2 0h1m4 0h3m2 0h1m2 0h1M3 12.5h2m3 0h1m3 0h1m1 0h1m1 0h2m2 0h1m2 0h1m1 0h1m1 0h2m3 0h2M2 13.5h3m1 0h2m3 0h4m1 0h2m2 0h1m2 0h1m1 0h1m1 0h4m1 0h2M1 14.5h4m8 0h1m1 0h1m2 0h4m3 0h1m6 0h1M1 15.5h1m3 0h3m2 0h3m2 0h2m4 0h4m1 0h3m1 0h3M3 16.5h2m9 0h1m1 0h3m3 0h1m1 0h1m2 0h3M1 17.5h1m3 0h5m1 0h2m4 0h1m2 0h1m2 0h1m1 0h3m1 0h1m1 0h1M2 18.5h4m5 0h3m2 0h2m1 0h1m4 0h1m3 0h1m1 0h4M1 19.5h1m1 0h1m3 0h1m3 0h1m1 0h1m1 0h4m3 0h3m1 0h1m3 0h1m1 0h1M1 20.5h3m6 0h1m2 0h1m2 0h5m1 0h1m2 0h2m5 0h2M5 21.5h5m1 0h2m1 0h3m2 0h1m1 0h1m2 0h1m2 0h3m2 0h2M1 22.5h3m1 0h2m1 0h3m1 0h2m1 0h1m1 0h1m2 0h1m1 0h3m2 0h2m1 0h3M4 23.5h1m1 0h2m4 0h1m1 0h1m2 0h1m2 0h1m1 0h1m1 0h1m2 0h1m1 0h1m2 0h1M3 24.5h2m3 0h2m1 0h3m4 0h1m1 0h5m2 0h1m1 0h2m1 0h2M1 25.5h4m2 0h2m3 0h2m1 0h2m5 0h1m1 0h7m1 0h1M9 26.5h1m3 0h2m1 0h3m1 0h1m1 0h2m1 0h1m3 0h4M1 27.5h7m1 0h2m2 0h1m2 0h1m2 0h1m4 0h2m1 0h1m1 0h1m2 0h1M1 28.5h1m5 0h1m2 0h1m3 0h1m2 0h1m3 0h1m1 0h1m1 0h1m3 0h1m2 0h1M1 29.5h1m1 0h3m1 0h1m1 0h2m6 0h1m2 0h1m2 0h1m1 0h5m3 0h1M1 30.5h1m1 0h3m1 0h1m2 0h4m5 0h3m3 0h1m1 0h1m1 0h4M1 31.5h1m1 0h3m1 0h1m3 0h1m4 0h1m1 0h2m1 0h1m3 0h1m3 0h3M1 32.5h1m5 0h1m2 0h3m1 0h1m1 0h3m3 0h3m1 0h1m3 0h1M1 33.5h7m1 0h2m1 0h1m1 0h2m1 0h2m1 0h1m1 0h4m4 0h1m2 0h1"/></svg></div>
+        <div>
+          <b>Litecoin (LTC)</b>
+          <small>cheapest for small amounts</small>
+          <code class="addr" id="ltc">LNgsoAL6tZr7NJBTshy15ucCzE65r6uWHp</code>
+          <button class="copy" type="button" data-copy="ltc">copy</button>
+        </div>
+      </div>
+      <div class="coin">
+        <div class="qr"><svg role="img" aria-label="Bitcoin address QR code" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h35v35H0z"/><path stroke="#0a0a0e" d="M1 1.5h7m5 0h3m1 0h8m2 0h7M1 2.5h1m5 0h1m4 0h5m1 0h1m4 0h1m1 0h1m1 0h1m5 0h1M1 3.5h1m1 0h3m1 0h1m1 0h2m1 0h3m3 0h3m1 0h1m4 0h1m1 0h3m1 0h1M1 4.5h1m1 0h3m1 0h1m1 0h1m2 0h2m1 0h3m2 0h2m1 0h3m1 0h1m1 0h3m1 0h1M1 5.5h1m1 0h3m1 0h1m1 0h2m5 0h1m2 0h1m4 0h1m2 0h1m1 0h3m1 0h1M1 6.5h1m5 0h1m1 0h1m1 0h3m1 0h5m1 0h2m4 0h1m5 0h1M1 7.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M9 8.5h2m1 0h2m1 0h2m5 0h2M1 9.5h1m1 0h5m2 0h1m3 0h1m1 0h3m2 0h1m1 0h1m1 0h1m1 0h5M1 10.5h1m2 0h2m2 0h2m2 0h1m2 0h1m4 0h2m1 0h2m1 0h3m3 0h2M1 11.5h1m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m3 0h2m1 0h1m8 0h5M4 12.5h2m3 0h4m2 0h1m1 0h1m2 0h3m2 0h2m2 0h4M1 13.5h4m2 0h6m3 0h1m2 0h1m3 0h1m2 0h1m1 0h3m2 0h1M5 14.5h2m5 0h6m3 0h4m2 0h1m2 0h2m1 0h1M1 15.5h1m5 0h1m1 0h3m2 0h2m2 0h3m1 0h2m1 0h1m1 0h1m2 0h1m1 0h1M1 16.5h1m4 0h1m3 0h1m1 0h3m2 0h1m2 0h3m2 0h1m1 0h1m2 0h2m1 0h1M1 17.5h1m1 0h2m2 0h3m4 0h2m1 0h2m1 0h2m1 0h2m1 0h1m1 0h2M1 18.5h5m5 0h4m2 0h2m1 0h1m1 0h1m1 0h1m2 0h1m2 0h4M2 19.5h1m3 0h2m1 0h1m1 0h1m4 0h1m1 0h1m2 0h1m4 0h1m4 0h2M1 20.5h2m7 0h3m2 0h8m2 0h1m1 0h7M2 21.5h1m1 0h1m2 0h6m1 0h4m5 0h1m1 0h1m3 0h1M1 22.5h3m1 0h2m2 0h3m1 0h1m1 0h2m2 0h1m3 0h2m1 0h2m5 0h1M1 23.5h1m4 0h3m1 0h2m3 0h3m1 0h1m1 0h3m4 0h2m1 0h2M1 24.5h1m2 0h1m4 0h2m2 0h1m1 0h2m3 0h1m1 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1M1 25.5h1m1 0h2m1 0h2m2 0h1m3 0h3m1 0h1m2 0h1m1 0h1m1 0h6M9 26.5h1m7 0h1m2 0h1m1 0h4m3 0h1m1 0h3M1 27.5h7m6 0h1m1 0h1m2 0h1m4 0h2m1 0h1m1 0h2M1 28.5h1m5 0h1m1 0h2m2 0h4m3 0h1m1 0h1m2 0h1m3 0h3M1 29.5h1m1 0h3m1 0h1m1 0h2m8 0h1m1 0h1m1 0h1m1 0h5m2 0h1M1 30.5h1m1 0h3m1 0h1m1 0h1m3 0h5m2 0h1m3 0h1m1 0h1m1 0h6M1 31.5h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m2 0h1M1 32.5h1m5 0h1m5 0h2m2 0h1m4 0h3m1 0h1m2 0h3M1 33.5h7m1 0h1m3 0h1m1 0h1m1 0h5m2 0h4m1 0h1m2 0h1"/></svg></div>
+        <div>
+          <b>Bitcoin (BTC)</b>
+          <small>on-chain, better for bigger amounts</small>
+          <code class="addr" id="btc">bc1qlytmy276zcsqw8dw2u43ywh7nuaf7qhufjrrh3</code>
+          <button class="copy" type="button" data-copy="btc">copy</button>
+        </div>
+      </div>
+    </section>
+
+    <footer><a href="../">tihvert.xyz</a></footer>
+  </main>
+  <script>
+    document.querySelectorAll('button.copy').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var text = document.getElementById(b.dataset.copy).textContent.trim();
+        var done = function () { b.textContent = 'copied'; setTimeout(function () { b.textContent = 'copy'; }, 1500); };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(done, function () { b.textContent = 'select + ctrl+c'; });
+        } else {
+          getSelection().selectAllChildren(document.getElementById(b.dataset.copy));
+          b.textContent = 'selected, ctrl+c';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
