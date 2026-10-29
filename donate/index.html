@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Support Tihvert</title>
-  <meta name="description" content="Support Tihvert's projects: Ko-fi (card, PayPal, Apple/Google Pay) or crypto (BTC, LTC).">
+  <meta name="description" content="Support Tihvert's projects: Ko-fi (card, PayPal, Apple/Google Pay), GitHub Sponsors or crypto (BTC, LTC).">
   <meta name="theme-color" content="#5b21b6">
   <link rel="canonical" href="https://tihvert.xyz/donate/">
   <meta property="og:type" content="website">
@@ -29,6 +29,7 @@
       --faint: #5a5a66;
       --accent: #c4b5fd;
       --kofi: #ff5e5b;
+      --gh: #bf3989;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { height: 100%; }
@@ -58,6 +59,8 @@
       transition: transform .15s ease, box-shadow .15s ease;
     }
     .kofi:hover, .kofi:focus-visible { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 94, 91, .3); outline: none; }
+    .kofi.gh { background: var(--gh); }
+    .kofi.gh:hover, .kofi.gh:focus-visible { box-shadow: 0 6px 20px rgba(219, 97, 162, .3); }
     .coin { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; }
     .coin + .coin { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
     .qr { width: 112px; height: 112px; border-radius: 8px; overflow: hidden; background: #fff; }
@@ -98,6 +101,12 @@
       <h2>KO-FI</h2>
       <p>Card, PayPal, Apple Pay or Google Pay. One-time or monthly, from $1.</p>
       <a class="kofi" href="https://ko-fi.com/tihvert" target="_blank" rel="noopener">Support on Ko-fi</a>
+    </section>
+
+    <section class="card">
+      <h2>GITHUB SPONSORS</h2>
+      <p>Card via GitHub. Monthly or one-time, from $1. No fees taken by GitHub.</p>
+      <a class="kofi gh" href="https://github.com/sponsors/Tihvert" target="_blank" rel="noopener">Sponsor on GitHub</a>
     </section>
 
     <section class="card">
