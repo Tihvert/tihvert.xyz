@@ -168,6 +168,28 @@
     .tmdb p { flex: 1 1 280px; }
     .legal { display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; }
 
+    .pf-group { margin-top: 44px; text-align: left; }
+    .pf-head { margin: 0 0 14px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .pf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+    .pf-grid-4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+    .pf { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 22px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012)); transition: border-color .3s, transform .3s var(--ease); }
+    .pf:not(.pf-off):hover { border-color: rgba(122,162,255,.35); transform: translateY(-3px); }
+    .pf.pf-off { background: none; }
+    .pf.pf-off .pf-logo { opacity: .55; }
+    .pf.pf-mine { border-color: rgba(122,162,255,.6); box-shadow: 0 0 0 1px rgba(122,162,255,.25), 0 18px 50px rgba(70,110,255,.14); }
+    .pf-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .pf-logo { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,.06); }
+    .pf-logo svg { width: 24px; height: 24px; }
+    .pf-state { padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; border: 1px solid var(--line); color: var(--muted); }
+    .pf-ok { color: #7ee2a8; border-color: rgba(126,226,168,.35); }
+    .pf-beta { color: #7aa2ff; border-color: rgba(122,162,255,.4); }
+    .pf-soon { color: #f0c674; border-color: rgba(240,198,116,.35); }
+    .pf h3 { margin: 4px 0 0; font-size: 18px; letter-spacing: -.01em; }
+    .pf p { margin: 0 0 6px; color: var(--muted); font-size: 14.5px; }
+    .pf .btn { margin-top: auto; }
+    .pf details { width: 100%; font-size: 14px; color: var(--muted); }
+    .pf summary { cursor: pointer; }
+    .pf details ol { margin: 8px 0 0; padding-left: 18px; }
     .reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
     .reveal.in { opacity: 1; transform: none; }
 
@@ -340,37 +362,71 @@
     <section id="install" class="tight">
       <div class="wrap center">
         <div class="kicker">All devices</div>
-        <h2>Every way to install Kino.</h2>
-        <p class="sub">You sign in with a Kino account on all of them, and an invite code creates one.</p>
-        <div class="grid">
-          <div class="card reveal">
-            <h3>Windows 10 and 11</h3>
-            <p>The full app with its own player. Updates itself.</p>
-            <p><a data-download href="https://tihvert.xyz/kino/Kino_0.2.9_x64-setup.exe">Download the installer</a></p>
+        <h2>Get Kino on your device.</h2>
+        <p class="sub">You sign in with a Kino account everywhere, and an invite code creates one.</p>
+        <div class="pf-group">
+          <h3 class="pf-head">Computer and browser</h3>
+          <div class="pf-grid">
+            <article class="pf" data-platform="windows">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5l7.4-1v7.1H3V5.5zm8.3-1.1L21 3v8.6h-9.7V4.4zM3 12.4h7.4v7.1L3 18.5v-6.1zm8.3 0H21V21l-9.7-1.3v-7.3z"/></svg></span><span class="pf-state pf-ok">Ready</span></div>
+              <h3>Windows 10 and 11</h3>
+              <p>The full app with its own player. Plays every file and updates itself.</p>
+              <a class="btn btn-primary" data-download href="https://tihvert.xyz/kino/Kino_0.2.9_x64-setup.exe">Download for Windows</a>
+            </article>
+            <article class="pf" data-platform="web">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 4 5.6 4 9s-1.4 6.4-4 9c-2.6-2.6-4-5.6-4-9s1.4-6.4 4-9z"/></svg></span><span class="pf-state pf-ok">Ready</span></div>
+              <h3>Any browser</h3>
+              <p>Nothing to install, on a computer, tablet or phone. Browsers can't play every file, so some versions may not start.</p>
+              <a class="btn btn-ghost" href="https://tihvert.xyz/kino/web/">Open in the browser</a>
+              <details><summary>How to install</summary><ol><li>Open Kino in the browser.</li><li>Optional: add it to the home screen to open it like an app.</li></ol></details>
+            </article>
           </div>
-          <div class="card reveal">
-            <h3>Any browser</h3>
-            <p>Nothing to install, on a computer, tablet or phone. Add it to the home screen to use it like an app. Browsers can't play every file, so some versions take longer to start or won't play.</p>
-            <p><a href="https://tihvert.xyz/kino/web/">Open Kino in the browser</a></p>
+        </div>
+        <div class="pf-group">
+          <h3 class="pf-head">Phone and tablet</h3>
+          <div class="pf-grid">
+            <article class="pf" data-platform="ios">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></span><span class="pf-state pf-beta">Beta</span></div>
+              <h3>iPhone and iPad</h3>
+              <p>iOS 16 or newer. Not in the App Store, so it is installed by hand.</p>
+              <a class="btn btn-ghost" href="https://tihvert.xyz/kino/Kino.ipa">Download the IPA</a>
+              <details><summary>How to install</summary><ol><li>Install Feather, AltStore or Sideloadly.</li><li>Open the IPA with it and install.</li><li>With a free Apple ID, reinstall every 7 days.</li></ol></details>
+            </article>
+            <article class="pf" data-platform="android">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.523 15.341c-.551 0-.999-.448-.999-.999s.448-.999.999-.999.999.448.999.999-.448.999-.999.999m-11.046 0c-.551 0-.999-.448-.999-.999s.448-.999.999-.999.999.448.999.999-.448.999-.999.999m11.405-6.02l1.997-3.459a.416.416 0 0 0-.152-.568.416.416 0 0 0-.568.152l-2.022 3.503c-1.546-.706-3.283-1.1-5.137-1.1s-3.591.394-5.137 1.1L4.841 5.446a.416.416 0 0 0-.568-.152.416.416 0 0 0-.152.568l1.997 3.459C2.689 11.187.343 14.659 0 18.761h24c-.344-4.102-2.689-7.574-6.118-9.44"/></svg></span><span class="pf-state pf-soon">In testing</span></div>
+              <h3>Android phones and tablets</h3>
+              <p>The app is built and being tried on its first phones. It will be here when it has passed. Until then, use the browser version.</p>
+              
+            </article>
           </div>
-          <div class="card reveal">
-            <h3>iPhone and iPad <small>(beta)</small></h3>
-            <p>iOS 16 or newer. Not in the App Store: install the file with Feather, AltStore or Sideloadly. With a free Apple ID it has to be reinstalled every 7 days.</p>
-            <p><a href="https://tihvert.xyz/kino/Kino.ipa">Download the IPA</a></p>
-          </div>
-          <div class="card reveal">
-            <h3>Android phones and tablets <small>(beta)</small></h3>
-            <p>Open the file on the device and allow installing from this source when Android asks. Updates are installed the same way for now.</p>
-            <p><a href="https://tihvert.xyz/kino/Kino-android.apk">Download the APK</a></p>
-          </div>
-          <div class="card reveal">
-            <h3>Android TV and Google TV <small>(experimental)</small></h3>
-            <p>The same APK, sideloaded with the Downloader app or adb. Remote control support is still being worked on, so a mouse or a paired phone may be needed.</p>
-            <p><a href="https://tihvert.xyz/kino/Kino-android.apk">Download the APK</a></p>
-          </div>
-          <div class="card reveal">
-            <h3>Other TVs</h3>
-            <p>No app yet for Samsung, LG or Apple TV. Cast from Kino on Windows to a Chromecast, use AirPlay from an iPhone, or plug in a computer or Google TV stick.</p>
+        </div>
+        <div class="pf-group">
+          <h3 class="pf-head">TV</h3>
+          <div class="pf-grid pf-grid-4">
+            <article class="pf">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.523 15.341c-.551 0-.999-.448-.999-.999s.448-.999.999-.999.999.448.999.999-.448.999-.999.999m-11.046 0c-.551 0-.999-.448-.999-.999s.448-.999.999-.999.999.448.999.999-.448.999-.999.999m11.405-6.02l1.997-3.459a.416.416 0 0 0-.152-.568.416.416 0 0 0-.568.152l-2.022 3.503c-1.546-.706-3.283-1.1-5.137-1.1s-3.591.394-5.137 1.1L4.841 5.446a.416.416 0 0 0-.568-.152.416.416 0 0 0-.152.568l1.997 3.459C2.689 11.187.343 14.659 0 18.761h24c-.344-4.102-2.689-7.574-6.118-9.44"/></svg></span><span class="pf-state pf-soon">In testing</span></div>
+              <h3>Android TV and Google TV</h3>
+              <p>Next in line, with remote control support on the way.</p>
+              
+            </article>
+            <article class="pf pf-off">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span><span class="pf-state pf-off">Not yet</span></div>
+              <h3>Samsung and LG</h3>
+              <p>No app yet. These TVs only take apps from outside their stores through developer mode.</p>
+              
+            </article>
+            <article class="pf pf-off">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg></span><span class="pf-state pf-off">Not planned</span></div>
+              <h3>Apple TV</h3>
+              <p>No app. Apple TV has no web view and takes a separate app written from scratch.</p>
+              
+            </article>
+            <article class="pf">
+              <div class="pf-top"><span class="pf-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span><span class="pf-state pf-ok">Works today</span></div>
+              <h3>Any other TV</h3>
+              <p>Connect a Windows computer over HDMI and run Kino on it.</p>
+              
+            </article>
           </div>
         </div>
       </div>
@@ -418,6 +474,12 @@
   </footer>
 
   <script>
+    // The card of the device this page is open on gets lit.
+    {
+      const ua = navigator.userAgent;
+      const mine = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? 'ios' : /Android/.test(ua) ? 'android' : /Windows/.test(ua) ? 'windows' : 'web';
+      document.querySelector('[data-platform="' + mine + '"]')?.classList.add('pf-mine');
+    }
     // The newest version, its download link and its notes come from the same latest.json Kino itself reads for updates.
     // The static values in the HTML stay if it can't be read.
     (async () => {
